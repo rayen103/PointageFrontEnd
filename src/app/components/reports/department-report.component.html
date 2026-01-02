@@ -1,0 +1,156 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="department-report-container">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200">
+          <h2 class="text-xl font-semibold text-slate-900">
+            <span class="text-lg">assessment</span>
+            Rapport par Département
+          </h2>
+        </div>
+        <div class="p-6">
+          <!-- Filters -->
+          <form [formGroup]="filterForm" class="filter-form">
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-slate-700 mb-2">Type de rapport</label>
+              <select class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-white" formControlName="reportType">
+                <option value="presence">Présence</option>
+                <option value="performance">Performance</option>
+                <option value="comparison">Comparaison</option>
+              </select>
+            </div>
+
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-slate-700 mb-2">Date début</label>
+              <input class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors" type="date" formControlName="startDate">
+
+
+            </div>
+
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-slate-700 mb-2">Date fin</label>
+              <input class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors" type="date" formControlName="endDate">
+
+
+            </div>
+
+            <button class="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors shadow-sm" (click)="generateReport()">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+              Générer
+            </button>
+          </form>
+
+          <!-- Loading -->
+          @if (loading()) {
+            <div class="loading-container">
+              <div class="flex justify-center py-8"><div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-200 border-t-primary-600"></div></div>
+            </div>
+          } @else {
+            <!-- Statistics Cards -->
+            <div class="stats-grid">
+              <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden" class="stat-card">
+                <div class="p-6">
+                  <div class="stat-icon departments">
+                    <span class="text-lg">business</span>
+                  </div>
+                  <div class="stat-info">
+                    <div class="stat-label">Départements</div>
+                    <div class="stat-value">{{ totalDepartments() }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden" class="stat-card">
+                <div class="p-6">
+                  <div class="stat-icon employees">
+                    <span class="text-lg">group</span>
+                  </div>
+                  <div class="stat-info">
+                    <div class="stat-label">Employés Total</div>
+                    <div class="stat-value">{{ totalEmployees() }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden" class="stat-card">
+                <div class="p-6">
+                  <div class="stat-icon rate">
+                    <span class="text-lg">trending_up</span>
+                  </div>
+                  <div class="stat-info">
+                    <div class="stat-label">Taux Moyen</div>
+                    <div class="stat-value">{{ avgPresenceRate() }}%</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden" class="stat-card">
+                <div class="p-6">
+                  <div class="stat-icon performance">
+                    <span class="text-lg">star</span>
+                  </div>
+                  <div class="stat-info">
+                    <div class="stat-label">Meilleur Département</div>
+                    <div class="stat-value">{{ bestDepartment() }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Department Comparison Table -->
+            <div class="table-container">
+              <table class="min-w-full divide-y divide-slate-200">
+                <thead class="bg-slate-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Service</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Effectif</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Présents</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Absents</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Retards</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Taux Présence</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Heures Moy.</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Tendance</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                  @for (dept of departments(); track dept.service) {
+                    <tr class="hover:bg-slate-50 transition-colors">
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{{ dept.service }}</td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{{ dept.totalEmployees }}</td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{{ dept.presentCount }}</td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{{ dept.absentCount }}</td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{{ dept.delayCount }}</td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                        <span [class]="'rate-badge ' + getRateClass(dept.presenceRate)">
+                          {{ dept.presenceRate }}%
+                        </span>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{{ dept.avgHours }}h</td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                        <span class="text-lg">
+                          {{ getTrendIcon(dept.trend) }}
+                        </span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Export Actions -->
+            <div class="actions">
+              <button class="inline-flex items-center gap-2 px-6 py-3 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors shadow-sm" (click)="exportPDF()">
+                <span class="text-lg">picture_as_pdf</span>
+                Exporter PDF
+              </button>
+              <button class="inline-flex items-center gap-2 px-6 py-3 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors shadow-sm" (click)="exportExcel()">
+                <span class="text-lg">table_chart</span>
+                Exporter Excel
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

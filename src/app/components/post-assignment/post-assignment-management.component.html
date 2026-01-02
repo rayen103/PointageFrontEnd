@@ -1,0 +1,95 @@
+<div class="post-assignment-management">
+    <mat-card class="search-card">
+        <mat-card-header>
+            <mat-card-title>
+                <mat-icon>assignment_ind</mat-icon>
+                Gestion des Affectations Postes
+            </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <div class="search-form">
+                <mat-form-field appearance="outline">
+                    <mat-label>Code Société</mat-label>
+                    <input matInput [(ngModel)]="searchCodeSoc" placeholder="CST">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Matricule</mat-label>
+                    <input matInput [value]="searchMatricule()" (input)="searchMatricule.set($any($event.target).value)"
+                        placeholder="Ex: E001">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Code Poste</mat-label>
+                    <input matInput [value]="searchCodePoste()" (input)="searchCodePoste.set($any($event.target).value)"
+                        placeholder="Ex: P01">
+                </mat-form-field>
+
+                <div class="search-actions">
+                    <button mat-raised-button color="primary" (click)="searchAssignments()">
+                        <mat-icon>search</mat-icon>
+                        Rechercher
+                    </button>
+                    <button mat-stroked-button (click)="clearSearch()">
+                        <mat-icon>clear</mat-icon>
+                        Effacer
+                    </button>
+                    <button mat-raised-button color="accent" (click)="openCreateDialog()">
+                        <mat-icon>add</mat-icon>
+                        Nouvelle Affectation
+                    </button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <mat-card class="results-card">
+        <mat-card-content>
+            @if (loading()) {
+            <div class="loading-container">
+                <mat-spinner diameter="40"></mat-spinner>
+                <span>Chargement...</span>
+            </div>
+            } @else {
+            <div class="results-header">
+                <span class="results-count">{{ totalCount() }} affectation(s) trouvée(s)</span>
+            </div>
+
+            <table mat-table [dataSource]="assignments()" class="assignment-table">
+                <!-- Matricule Column -->
+                <ng-container matColumnDef="matricule">
+                    <th mat-header-cell *matHeaderCellDef>Matricule</th>
+                    <td mat-cell *matCellDef="let assignment">{{ assignment.matricule }}</td>
+                </ng-container>
+
+                <!-- Code Poste Column -->
+                <ng-container matColumnDef="codePoste">
+                    <th mat-header-cell *matHeaderCellDef>Poste</th>
+                    <td mat-cell *matCellDef="let assignment">{{ assignment.codePoste }}</td>
+                </ng-container>
+
+                <!-- Actions Column -->
+                <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef>Actions</th>
+                    <td mat-cell *matCellDef="let assignment">
+                        <button mat-icon-button color="warn" matTooltip="Supprimer"
+                            (click)="deleteAssignment(assignment)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+
+            @if (assignments().length === 0) {
+            <div class="no-data">
+                <mat-icon>inbox</mat-icon>
+                <p>Aucune affectation trouvée</p>
+            </div>
+            }
+            }
+        </mat-card-content>
+    </mat-card>
+</div>

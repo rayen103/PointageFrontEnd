@@ -1,0 +1,159 @@
+.user-access-management {
+    padding: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.search-card {
+    margin-bottom: 24px;
+
+    mat-card-header {
+        margin-bottom: 16px;
+
+        mat-card-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.25rem;
+            color: #333;
+
+            mat-icon {
+                color: #1976d2;
+            }
+        }
+    }
+}
+
+.search-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-start;
+
+    mat-form-field {
+        flex: 1;
+        min-width: 150px;
+        max-width: 200px;
+    }
+
+    .search-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+        padding-top: 4px;
+    }
+}
+
+.results-card {
+    mat-card-content {
+        padding: 0;
+    }
+}
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    gap: 16px;
+    color: #666;
+}
+
+.results-header {
+    padding: 16px;
+    border-bottom: 1px solid #e0e0e0;
+    background: #fafafa;
+
+    .results-count {
+        font-weight: 500;
+        color: #666;
+    }
+}
+
+.user-table {
+    width: 100%;
+
+    th.mat-header-cell {
+        font-weight: 600;
+        color: #333;
+        background: #f5f5f5;
+    }
+
+    td.mat-cell {
+        padding: 12px 16px;
+    }
+}
+
+.role-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+
+    &.role-admin {
+        background: #ffebee;
+        color: #c62828;
+    }
+
+    &.role-manager {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    &.role-rh {
+        background: #e3f2fd;
+        color: #1565c0;
+    }
+
+    &.role-user {
+        background: #f5f5f5;
+        color: #616161;
+    }
+}
+
+.admin-icon {
+    color: #ff9800;
+}
+
+.no-data {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    color: #999;
+
+    mat-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+    }
+
+    p {
+        margin: 0;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .user-access-management {
+        padding: 16px;
+    }
+
+    .search-form {
+        mat-form-field {
+            max-width: 100%;
+            flex-basis: 100%;
+        }
+
+        .search-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+    }
+}

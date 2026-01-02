@@ -1,0 +1,66 @@
+.work-post-management {
+  padding: 20px;
+
+  mat-card {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .search-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 20px;
+
+    mat-form-field {
+      flex: 1;
+      min-width: 180px;
+      max-width: 250px;
+    }
+
+    .search-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+  }
+
+  .loading-spinner {
+    display: flex;
+    justify-content: center;
+    padding: 40px;
+  }
+
+  .results-container {
+    .results-count {
+      color: rgba(0, 0, 0, 0.6);
+      margin-bottom: 16px;
+      font-size: 0.875rem;
+    }
+  }
+
+  .work-posts-table {
+    width: 100%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    th {
+      font-weight: 600;
+      background-color: #f5f5f5;
+    }
+
+    td, th {
+      padding: 12px 16px;
+    }
+  }
+
+  .no-data {
+    text-align: center;
+    padding: 40px;
+    color: rgba(0, 0, 0, 0.5);
+
+    p {
+      font-size: 1.1rem;
+    }
+  }
+}

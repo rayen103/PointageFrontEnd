@@ -1,0 +1,222 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 animate-fade-in">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 animate-slide-in-down">
+      <div>
+        <h1 class="text-3xl font-bold text-slate-900">Tableau de Bord</h1>
+        <p class="text-slate-600 mt-1">Vue d'ensemble de la gestion du pointage</p>
+      </div>
+      <button 
+        (click)="refresh()" 
+        [disabled]="loading()"
+        class="btn-primary inline-flex items-center gap-2">
+        <svg class="w-5 h-5" [class.animate-spin]="loading()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        <span>Actualiser</span>
+      </button>
+    </div>
+
+    <!-- Loading State -->
+    @if (loading()) {
+      <div class="flex flex-col items-center justify-center py-20">
+        <div class="spinner-lg"></div>
+        <p class="text-slate-600 mt-4">Chargement du tableau de bord...</p>
+      </div>
+    }
+
+    <!-- Dashboard Content -->
+    @if (!loading() && dashboardData()) {
+      <!-- Statistics Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 animate-scale-in">
+        @for (card of statsCards(); track card.title) {
+          <div 
+            (click)="navigateTo(card.route)"
+            class="card cursor-pointer hover:shadow-md transition-all duration-300 border border-slate-200 hover:border-primary-300 group animate-bounce-in">
+            <div class="flex items-center justify-between mb-4">
+              <div class="p-3 rounded-lg bg-gradient-to-br" 
+                   [class.from-blue-50]="card.color === 'primary'"
+                   [class.to-blue-100]="card.color === 'primary'"
+                   [class.from-pink-50]="card.color === 'accent'"
+                   [class.to-pink-100]="card.color === 'accent'"
+                   [class.from-orange-50]="card.color === 'warn'"
+                   [class.to-orange-100]="card.color === 'warn'">
+                <span class="text-3xl">{{ card.icon }}</span>
+              </div>
+              <svg class="w-5 h-5 text-slate-400 group-hover:text-primary-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+            <h3 class="text-sm font-medium text-slate-600 mb-2">{{ card.title }}</h3>
+            <div class="flex items-baseline gap-2">
+              <span class="text-3xl font-bold text-slate-900">{{ card.value }}</span>
+              @if (card.suffix) {
+                <span class="text-lg text-slate-500">{{ card.suffix }}</span>
+              }
+              @if (card.total) {
+                <span class="text-lg text-slate-400">/ {{ card.total }}</span>
+              }
+            </div>
+            @if (card.percentage !== undefined) {
+              <div class="mt-3 flex items-center gap-2">
+                <div class="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full rounded-full transition-all duration-500"
+                       [class.bg-success-500]="card.percentage >= 80"
+                       [class.bg-warning-500]="card.percentage >= 50 && card.percentage < 80"
+                       [class.bg-danger-500]="card.percentage < 50"
+                       [style.width.%]="card.percentage"></div>
+                </div>
+                <span class="text-sm font-semibold"
+                      [class.text-success-600]="card.percentage >= 80"
+                      [class.text-warning-600]="card.percentage >= 50 && card.percentage < 80"
+                      [class.text-danger-600]="card.percentage < 50">
+                  {{ card.percentage }}%
+                </span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="mb-8 animate-slide-in-left">
+        <h2 class="text-xl font-semibold text-slate-900 mb-4">Actions Rapides</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <button 
+            (click)="navigateTo('/leaves')"
+            class="card text-left hover:shadow-md transition-all border border-slate-200 hover:border-primary-300 group">
+            <div class="flex items-center gap-4">
+              <div class="p-3 rounded-lg bg-gradient-to-br from-purple-50 to-purple-100 group-hover:from-purple-100 group-hover:to-purple-200 transition-colors">
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-semibold text-slate-900">Demandes de Congé</h3>
+                <p class="text-sm text-slate-600">Gérer les demandes</p>
+              </div>
+            </div>
+          </button>
+
+          <button 
+            (click)="navigateTo('/attendance')"
+            class="card text-left hover:shadow-md transition-all border border-slate-200 hover:border-primary-300 group">
+            <div class="flex items-center gap-4">
+              <div class="p-3 rounded-lg bg-gradient-to-br from-green-50 to-green-100 group-hover:from-green-100 group-hover:to-green-200 transition-colors">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-semibold text-slate-900">Valider Présence</h3>
+                <p class="text-sm text-slate-600">Présence quotidienne</p>
+              </div>
+            </div>
+          </button>
+
+          <button 
+            (click)="navigateTo('/schedules')"
+            class="card text-left hover:shadow-md transition-all border border-slate-200 hover:border-primary-300 group">
+            <div class="flex items-center gap-4">
+              <div class="p-3 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 group-hover:from-blue-100 group-hover:to-blue-200 transition-colors">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-semibold text-slate-900">Planification</h3>
+                <p class="text-sm text-slate-600">Horaires et équipes</p>
+              </div>
+            </div>
+          </button>
+
+          <button 
+            (click)="navigateTo('/reports')"
+            class="card text-left hover:shadow-md transition-all border border-slate-200 hover:border-primary-300 group">
+            <div class="flex items-center gap-4">
+              <div class="p-3 rounded-lg bg-gradient-to-br from-amber-50 to-amber-100 group-hover:from-amber-100 group-hover:to-amber-200 transition-colors">
+                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-semibold text-slate-900">Rapports</h3>
+                <p class="text-sm text-slate-600">Consulter les données</p>
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="card animate-slide-in-right">
+        <h2 class="card-title mb-6">Résumé Aujourd'hui</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+            <div>
+              <p class="text-sm text-slate-600 mb-1">Total Employés</p>
+              <p class="text-2xl font-bold text-slate-900">{{ dashboardData()?.totalEmployees || 0 }}</p>
+            </div>
+            <div class="p-3 bg-slate-200 rounded-lg">
+              <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between p-4 bg-success-50 rounded-lg">
+            <div>
+              <p class="text-sm text-success-700 mb-1">Présents</p>
+              <p class="text-2xl font-bold text-success-900">{{ dashboardData()?.presentToday || dashboardData()?.employesPresentsAujourdhui || 0 }}</p>
+            </div>
+            <div class="p-3 bg-success-200 rounded-lg">
+              <svg class="w-6 h-6 text-success-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between p-4 bg-danger-50 rounded-lg">
+            <div>
+              <p class="text-sm text-danger-700 mb-1">Absents</p>
+              <p class="text-2xl font-bold text-danger-900">{{ dashboardData()?.absentToday || dashboardData()?.employesAbsentsAujourdhui || 0 }}</p>
+            </div>
+            <div class="p-3 bg-danger-200 rounded-lg">
+              <svg class="w-6 h-6 text-danger-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between p-4 rounded-lg"
+               [class.bg-success-50]="presenceRate() >= 80"
+               [class.bg-warning-50]="presenceRate() >= 50 && presenceRate() < 80"
+               [class.bg-danger-50]="presenceRate() < 50">
+            <div>
+              <p class="text-sm mb-1"
+                 [class.text-success-700]="presenceRate() >= 80"
+                 [class.text-warning-700]="presenceRate() >= 50 && presenceRate() < 80"
+                 [class.text-danger-700]="presenceRate() < 50">Taux de Présence</p>
+              <p class="text-2xl font-bold"
+                 [class.text-success-900]="presenceRate() >= 80"
+                 [class.text-warning-900]="presenceRate() >= 50 && presenceRate() < 80"
+                 [class.text-danger-900]="presenceRate() < 50">{{ presenceRate() }}%</p>
+            </div>
+            <div class="p-3 rounded-lg"
+                 [class.bg-success-200]="presenceRate() >= 80"
+                 [class.bg-warning-200]="presenceRate() >= 50 && presenceRate() < 80"
+                 [class.bg-danger-200]="presenceRate() < 50">
+              <svg class="w-6 h-6"
+                   [class.text-success-700]="presenceRate() >= 80"
+                   [class.text-warning-700]="presenceRate() >= 50 && presenceRate() < 80"
+                   [class.text-danger-700]="presenceRate() < 50"
+                   fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

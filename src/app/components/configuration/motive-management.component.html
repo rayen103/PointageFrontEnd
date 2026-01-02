@@ -1,0 +1,103 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200">
+      <div class="px-6 py-4 border-b border-slate-200">
+        <h2 class="text-2xl font-bold text-slate-900">Gestion des Motifs</h2>
+        <p class="text-sm text-slate-600 mt-1">Gérer les motifs d'absence, retard et autorisation</p>
+      </div>
+
+      <div class="p-6">
+        <!-- Type Selection -->
+        <div class="mb-6 flex gap-3">
+          <button class="px-4 py-2 rounded-lg" 
+                  [class]="motiveType() === 'absence' ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-700'"
+                  (click)="motiveType.set('absence'); loadMotives()">
+            Absence
+          </button>
+          <button class="px-4 py-2 rounded-lg"
+                  [class]="motiveType() === 'delay' ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-700'"
+                  (click)="motiveType.set('delay')">
+            Retard
+          </button>
+          <button class="px-4 py-2 rounded-lg"
+                  [class]="motiveType() === 'authorization' ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-700'"
+                  (click)="motiveType.set('authorization')">
+            Autorisation
+          </button>
+          <button class="ml-auto px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  (click)="showForm.set(!showForm())">
+            + Nouveau Motif
+          </button>
+        </div>
+
+        <!-- New Motive Form -->
+        @if (showForm()) {
+          <div class="mb-6 bg-slate-50 border border-slate-200 rounded-lg p-4">
+            <h3 class="text-lg font-semibold mb-3">Nouveau Motif</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Code *</label>
+                <input type="text" class="w-full px-4 py-2 border border-slate-300 rounded-lg"
+                    [ngModel]="newMotive().codeMotif" (ngModelChange)="updateNewMotive('codeMotif', $event)">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Désignation *</label>
+                <input type="text" class="w-full px-4 py-2 border border-slate-300 rounded-lg"
+                    [ngModel]="newMotive().designMotif" (ngModelChange)="updateNewMotive('designMotif', $event)">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Abréviation</label>
+                <input type="text" class="w-full px-4 py-2 border border-slate-300 rounded-lg"
+                    [ngModel]="newMotive().abrev" (ngModelChange)="updateNewMotive('abrev', $event)">
+              </div>
+            </div>
+            <div class="flex gap-3">
+              <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" (click)="createMotive()">
+                Enregistrer
+              </button>
+              <button class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300" (click)="showForm.set(false)">
+                Annuler
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- Messages -->
+        @if (error()) {
+          <div class="mb-4 bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">{{ error() }}</div>
+        }
+        @if (success()) {
+          <div class="mb-4 bg-green-50 border border-green-200 rounded-lg p-4 text-sm text-green-700">{{ success() }}</div>
+        }
+
+        <!-- Motives List -->
+        @if (loading()) {
+          <div class="flex justify-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600"></div>
+          </div>
+        } @else if (motives().length > 0) {
+          <div class="space-y-2">
+            @for (motive of motives(); track motive.codeMotif) {
+              <div class="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:bg-slate-50">
+                <div>
+                  <p class="font-medium text-slate-900">{{ motive.codeMotif }} - {{ motive.designMotif }}</p>
+                  @if (motive.abrev) {
+                    <p class="text-sm text-slate-500">Abréviation: {{ motive.abrev }}</p>
+                  }
+                </div>
+                <button class="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
+                        (click)="deleteMotive(motive.codeMotif)">
+                  Supprimer
+                </button>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="text-center py-12 text-slate-500">
+            Aucun motif trouvé. Cliquez sur "Nouveau Motif" pour en ajouter.
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

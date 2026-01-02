@@ -1,0 +1,233 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <!-- Header -->
+      <div class="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-indigo-50 to-blue-50">
+        <h2 class="text-2xl font-bold text-slate-900">Traitement des Heures de Nuit</h2>
+        <p class="text-sm text-slate-600 mt-1">Calcul et gestion des heures de nuit et primes associées</p>
+      </div>
+
+      <!-- Filters -->
+      <div class="p-6 bg-slate-50 border-b border-slate-200">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-2">Date Début</label>
+            <input 
+              class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" 
+              type="date" 
+              [ngModel]="dateDebut()"
+              (ngModelChange)="dateDebut.set($event)">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-2">Date Fin</label>
+            <input 
+              class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" 
+              type="date" 
+              [ngModel]="dateFin()"
+              (ngModelChange)="dateFin.set($event)">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-2">Matricule (optionnel)</label>
+            <input 
+              class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" 
+              type="text" 
+              placeholder="Tous les employés"
+              [ngModel]="matricule()"
+              (ngModelChange)="matricule.set($event)">
+          </div>
+          <div class="flex items-end">
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input 
+                type="checkbox" 
+                class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                [ngModel]="calculatePremiums()"
+                (ngModelChange)="calculatePremiums.set($event)">
+              <span class="text-sm text-slate-700">Calculer les primes</span>
+            </label>
+          </div>
+        </div>
+        
+        <div class="flex gap-3 mt-4">
+          <button 
+            class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            [disabled]="loading()"
+            (click)="calculateNightHours()">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+            Calculer les Heures
+          </button>
+          
+          <button 
+            class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            [disabled]="loading()"
+            (click)="generateReport()">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Générer le Rapport
+          </button>
+          
+          <button 
+            class="inline-flex items-center gap-2 px-6 py-3 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors"
+            (click)="clearFilters()">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            Effacer
+          </button>
+          
+          @if (nightShiftData().length > 0) {
+            <button 
+              class="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm ml-auto"
+              (click)="exportToExcel()">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Exporter Excel
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="p-6">
+        @if (loading()) {
+          <div class="flex justify-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-indigo-200 border-t-indigo-600"></div>
+          </div>
+        } @else if (error()) {
+          <div class="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+            <svg class="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div class="flex-1">
+              <h3 class="text-sm font-medium text-red-800">Erreur</h3>
+              <p class="text-sm text-red-700 mt-1">{{ error() }}</p>
+            </div>
+            <button 
+              class="text-red-500 hover:text-red-700"
+              (click)="error.set(null)">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        } @else if (nightShiftData().length > 0) {
+          <!-- Summary Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-blue-600">Employés</p>
+                  <p class="text-2xl font-bold text-blue-900 mt-1">{{ totalEmployees() }}</p>
+                </div>
+                <svg class="w-10 h-10 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg p-4 border border-indigo-200">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-indigo-600">Total Heures Nuit</p>
+                  <p class="text-2xl font-bold text-indigo-900 mt-1">{{ formatHours(totalNightHours()) }}</p>
+                </div>
+                <svg class="w-10 h-10 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              </div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-purple-600">Taux Prime</p>
+                  <p class="text-2xl font-bold text-purple-900 mt-1">{{ (premiumRate() * 100) }}%</p>
+                </div>
+                <svg class="w-10 h-10 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-green-600">Montant Total</p>
+                  <p class="text-2xl font-bold text-green-900 mt-1">{{ formatCurrency(totalPremiumAmount()) }}</p>
+                </div>
+                <svg class="w-10 h-10 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="overflow-x-auto rounded-lg border border-slate-200">
+            <table class="min-w-full divide-y divide-slate-200">
+              <thead class="bg-slate-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Matricule</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Nom & Prénom</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Date</th>
+                  <th class="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Heures Nuit</th>
+                  <th class="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Heures Prime</th>
+                  <th class="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Montant Prime</th>
+                  <th class="px-6 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-slate-200">
+                @for (employee of nightShiftData(); track employee.matricule + employee.date) {
+                  <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">
+                      {{ employee.matricule }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-700">
+                      {{ employee.nomPrenom || '-' }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-700">
+                      {{ employee.date }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-indigo-600 font-semibold"
+                        [matTooltip]="getNightPeriodsTooltip(employee)"
+                        matTooltipPosition="left">
+                      {{ formatHours(employee.totalNightHours) }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-purple-600 font-semibold">
+                      {{ formatHours(employee.nightPremiumHours) }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-green-600 font-semibold">
+                      {{ formatCurrency(employee.nightPremiumAmount) }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
+                      <button 
+                        class="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-indigo-50 text-indigo-700 rounded-md hover:bg-indigo-100 transition-colors"
+                        [matTooltip]="'Ajuster les heures'"
+                        (click)="adjustNightHours(employee)">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Ajuster
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <div class="text-center py-12">
+            <svg class="w-16 h-16 text-slate-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+            <h3 class="text-lg font-medium text-slate-900 mb-2">Aucune donnée</h3>
+            <p class="text-sm text-slate-500">Sélectionnez une période et cliquez sur "Calculer les Heures" pour afficher les données</p>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

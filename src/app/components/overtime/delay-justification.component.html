@@ -1,0 +1,81 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="justify-container">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200">
+          <div class="text-xl font-semibold text-slate-900">
+            <h2>Justification des Retards</h2>
+          </h2>
+        </div>
+
+        <div class="p-6">
+          @if (loading()) {
+            <div class="loading">
+              <div class="flex justify-center py-8"><div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-200 border-t-primary-600"></div></div>
+            </div>
+          } @else {
+            <div class="stats">
+              <div class="stat-item warn">
+                <span class="stat-value">{{ unjustifiedCount() }}</span>
+                <span class="stat-label">Non Justifiés</span>
+              </div>
+              <div class="stat-item success">
+                <span class="stat-value">{{ justifiedCount() }}</span>
+                <span class="stat-label">Justifiés</span>
+              </div>
+            </div>
+
+            <div class="table-container">
+              <table class="min-w-full divide-y divide-slate-200"  >
+                
+                  <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider" >Matricule</th>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900" >{{ delay.matricule }}</td>
+                
+
+                
+                  <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider" >Date</th>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900" >{{ delay.dateRetard | date:'dd/MM/yyyy' }}</td>
+                
+
+                
+                  <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider" >Durée</th>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900" >{{ delay.retardMinutes }} min</td>
+                
+
+                
+                  <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider" >Motif</th>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900" >
+                    @if (delay.motifRetard) {
+                      <span>{{ delay.motifRetard }}</span>
+                    } @else {
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Non justifié</span>
+                    }
+                  </td>
+                
+
+                
+                  <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider" >Actions</th>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900" >
+                    @if (!delay.motifRetard) {
+                      <button class="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors shadow-sm" (click)="justifyDelay(delay)">
+                        <span class="text-lg">assignment</span>
+                        Justifier
+                      </button>
+                    } @else {
+                      <button class="p-2 rounded-lg hover:bg-slate-100 transition-colors" (click)="viewJustification(delay)">
+                        <span class="text-lg">visibility</span>
+                      </button>
+                    }
+                  </td>
+                
+
+                <tr class="bg-slate-50" ></tr>
+                <tr class="hover:bg-slate-50 transition-colors" ></tr>
+              </table>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

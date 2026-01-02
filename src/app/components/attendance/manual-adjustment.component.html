@@ -1,0 +1,119 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200">
+      <div class="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-purple-50 to-pink-50">
+        <h2 class="text-2xl font-bold text-slate-900">Ajustement Manuel</h2>
+        <p class="text-sm text-slate-600 mt-1">Modifier manuellement les horaires de pointage</p>
+      </div>
+
+      <div class="p-6">
+        <!-- Search Section -->
+        <div class="mb-6 bg-slate-50 border border-slate-200 rounded-lg p-4">
+          <h3 class="text-lg font-semibold text-slate-900 mb-4">Rechercher un Enregistrement</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="md:col-span-1">
+              <label class="block text-sm font-medium text-slate-700 mb-2">Matricule *</label>
+              <input type="text" class="w-full px-4 py-2 border border-slate-300 rounded-lg"
+                     placeholder="Matricule..."
+                     [ngModel]="searchMatricule()" (ngModelChange)="searchMatricule.set($event)">
+            </div>
+            <div class="md:col-span-1">
+              <label class="block text-sm font-medium text-slate-700 mb-2">Date *</label>
+              <input type="date" class="w-full px-4 py-2 border border-slate-300 rounded-lg"
+                     [ngModel]="searchDate()" (ngModelChange)="searchDate.set($event)">
+            </div>
+            <div class="md:col-span-1 flex items-end">
+              <button class="w-full px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                      [disabled]="loading()" (click)="searchRecord()">
+                Rechercher
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Messages -->
+        @if (error()) {
+          <div class="mb-4 bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">
+            {{ error() }}
+          </div>
+        }
+        @if (success()) {
+          <div class="mb-4 bg-green-50 border border-green-200 rounded-lg p-4 text-sm text-green-700">
+            {{ success() }}
+          </div>
+        }
+
+        <!-- Adjustment Form -->
+        @if (record()) {
+          <div class="border border-slate-200 rounded-lg p-6">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-lg font-semibold text-slate-900">Ajuster l'Enregistrement</h3>
+              <span class="text-sm text-slate-600">Matricule: {{ record()!.matricule }}</span>
+            </div>
+
+            <div class="space-y-4">
+              <!-- Current Values Display -->
+              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p class="text-sm font-medium text-blue-900 mb-2">Valeurs Actuelles</p>
+                <div class="grid grid-cols-2 gap-4 text-sm text-blue-700">
+                  <div>
+                    <span class="font-medium">Entrée:</span>
+                    {{ record()!.heureEntree ? formatTime(record()!.heureEntree) : 'Non enregistrée' }}
+                  </div>
+                  <div>
+                    <span class="font-medium">Sortie:</span>
+                    {{ record()!.heureSortie ? formatTime(record()!.heureSortie) : 'Non enregistrée' }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- New Values Input -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-2">Nouvelle Heure d'Entrée</label>
+                  <input type="time" class="w-full px-4 py-2 border border-slate-300 rounded-lg"
+                         [ngModel]="adjustment().heureEntree"
+                        (ngModelChange)="updateAdjustment('heureEntree', $event)">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-2">Nouvelle Heure de Sortie</label>
+                  <input type="time" class="w-full px-4 py-2 border border-slate-300 rounded-lg"
+                         [ngModel]="adjustment().heureSortie"
+                        (ngModelChange)="updateAdjustment('heureSortie', $event)">
+                </div>
+              </div>
+
+              <!-- Reason -->
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Raison de l'Ajustement *</label>
+                <textarea class="w-full px-4 py-2 border border-slate-300 rounded-lg resize-none" rows="3"
+                          placeholder="Expliquez la raison de cet ajustement..."
+                          [ngModel]="adjustment().reason"
+                          (ngModelChange)="updateAdjustment('reason', $event)"></textarea>
+              </div>
+
+              <!-- Actions -->
+              <div class="flex gap-3 pt-4">
+                <button class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                        [disabled]="!adjustment().reason" (click)="saveAdjustment()">
+                  Enregistrer l'Ajustement
+                </button>
+                <button class="px-6 py-3 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300"
+                        (click)="clearForm()">
+                  Annuler
+                </button>
+              </div>
+            </div>
+          </div>
+        } @else {
+          <div class="text-center py-12 text-slate-500">
+            <svg class="w-16 h-16 text-slate-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <p>Recherchez un enregistrement pour commencer l'ajustement</p>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

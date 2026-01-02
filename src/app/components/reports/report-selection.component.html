@@ -1,0 +1,30 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="report-container">
+      <div class="header">
+        <h1>Rapports et Analyses</h1>
+        <p>Sélectionnez le type de rapport à générer</p>
+      </div>
+
+      <div class="report-grid">
+        @for (report of reportTypes(); track report.id) {
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden" class="report-card" [class]="report.color" (click)="selectReport(report)">
+            <div class="p-6">
+              <div class="card-icon">
+                <span class="text-lg">{{ report.icon }}</span>
+              </div>
+              <div class="card-content">
+                <h3>{{ report.title }}</h3>
+                <p>{{ report.description }}</p>
+              </div>
+              <button class="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors shadow-sm">
+                Générer
+                <span class="text-lg">arrow_forward</span>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

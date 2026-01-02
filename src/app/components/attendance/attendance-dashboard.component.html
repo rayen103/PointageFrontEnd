@@ -1,0 +1,113 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="dashboard-container">
+      <div class="dashboard-header">
+        <h1>Tableau de Bord - Présence en Temps Réel</h1>
+        <button class="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors shadow-sm" (click)="refresh()">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+          Actualiser
+        </button>
+      </div>
+
+      @if (loading()) {
+        <div class="loading">
+          <div class="flex justify-center py-8"><div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-200 border-t-primary-600"></div></div>
+        </div>
+      } @else {
+        <div class="stats-grid">
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden" class="stat-card primary">
+            <div class="p-6">
+              <div class="stat-icon">
+                <span class="text-lg">people</span>
+              </div>
+              <div class="stat-data">
+                <div class="stat-value">{{ presentToday() }}</div>
+                <div class="stat-label">Présents Aujourd'hui</div>
+                <div class="stat-subtitle">Sur {{ totalEmployees() }} employés</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden" class="stat-card warn">
+            <div class="p-6">
+              <div class="stat-icon">
+                <span class="text-lg">person_off</span>
+              </div>
+              <div class="stat-data">
+                <div class="stat-value">{{ absentToday() }}</div>
+                <div class="stat-label">Absents</div>
+                <div class="stat-subtitle">{{ absenceRate() }}% du total</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden" class="stat-card accent">
+            <div class="p-6">
+              <div class="stat-icon">
+                <span class="text-lg">schedule</span>
+              </div>
+              <div class="stat-data">
+                <div class="stat-value">{{ delays() }}</div>
+                <div class="stat-label">Retards</div>
+                <div class="stat-subtitle">Ce mois</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden" class="stat-card success">
+            <div class="p-6">
+              <div class="stat-icon">
+                <span class="text-lg">trending_up</span>
+              </div>
+              <div class="stat-data">
+                <div class="stat-value">{{ presenceRate() }}%</div>
+                <div class="stat-label">Taux de Présence</div>
+                <div class="stat-subtitle">Mensuel</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden" class="stat-card info">
+            <div class="p-6">
+              <div class="stat-icon">
+                <span class="text-lg">event_busy</span>
+              </div>
+              <div class="stat-data">
+                <div class="stat-value">{{ pendingLeaves() }}</div>
+                <div class="stat-label">Congés en Attente</div>
+                <div class="stat-subtitle">À valider</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden" class="stat-card warning">
+            <div class="p-6">
+              <div class="stat-icon">
+                <span class="text-lg">access_time</span>
+              </div>
+              <div class="stat-data">
+                <div class="stat-value">{{ overtimeHours() }}h</div>
+                <div class="stat-label">Heures Supp</div>
+                <div class="stat-subtitle">Ce mois</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="charts-section">
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200">
+              <div class="text-xl font-semibold text-slate-900">Tendances</div>
+            </div>
+            <div class="p-6">
+              <div class="placeholder-chart">
+                <span class="text-lg">insert_chart</span>
+                <p>Graphiques de tendances à venir</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,363 @@
+<div class="container mx-auto p-6">
+  <!-- Header -->
+  <div class="bg-gradient-to-r from-orange-500 to-red-600 rounded-lg shadow-lg p-6 mb-6 text-white">
+    <div class="flex justify-between items-center">
+      <div>
+        <h1 class="text-3xl font-bold mb-2">🍽️ Meal Allowance & Premiums</h1>
+        <p class="text-orange-100">Calculate and manage employee meal allowances</p>
+      </div>
+      <div class="flex space-x-3">
+        <button
+          (click)="openRulesModal()"
+          class="bg-white text-orange-600 px-4 py-2 rounded-lg font-semibold hover:bg-orange-50 transition-colors shadow-md">
+          ⚙️ Rules
+        </button>
+        <button
+          (click)="openCalculateModal()"
+          class="bg-white text-orange-600 px-4 py-2 rounded-lg font-semibold hover:bg-orange-50 transition-colors shadow-md">
+          📊 Calculate
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success/Error Messages -->
+  @if (successMessage()) {
+    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+      {{ successMessage() }}
+    </div>
+  }
+  @if (errorMessage()) {
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <!-- Statistics Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-lg shadow p-4">
+      <div class="text-gray-500 text-sm mb-1">Total Employees</div>
+      <div class="text-3xl font-bold text-gray-800">{{ stats().total }}</div>
+    </div>
+    <div class="bg-orange-50 rounded-lg shadow p-4">
+      <div class="text-orange-600 text-sm mb-1">Total Amount</div>
+      <div class="text-3xl font-bold text-orange-700">{{ stats().totalAmount | number:'1.2-2' }} DH</div>
+    </div>
+    <div class="bg-blue-50 rounded-lg shadow p-4">
+      <div class="text-blue-600 text-sm mb-1">Average/Employee</div>
+      <div class="text-3xl font-bold text-blue-700">{{ stats().avgAmount | number:'1.2-2' }} DH</div>
+    </div>
+    <div class="bg-green-50 rounded-lg shadow p-4">
+      <div class="text-green-600 text-sm mb-1">Status</div>
+      <div class="text-sm">
+        <div class="text-blue-600">📊 {{ stats().calculated }} Calculated</div>
+        <div class="text-green-600">✅ {{ stats().approved }} Approved</div>
+        <div class="text-purple-600">💰 {{ stats().transferred }} Transferred</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="bg-white rounded-lg shadow p-4 mb-6">
+    <div class="flex justify-between items-center">
+      <h3 class="font-semibold text-gray-700">Actions</h3>
+      <div class="flex space-x-3">
+        <button
+          (click)="approveAllowances()"
+          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+          ✅ Approve Calculated
+        </button>
+        <button
+          (click)="transferToPayroll()"
+          class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+          💰 Transfer to Payroll
+        </button>
+        <button
+          (click)="exportToExcel()"
+          class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+          📥 Export
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white rounded-lg shadow p-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Month</label>
+        <select
+          [(ngModel)]="selectedMonth"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+          <option [value]="1">January</option>
+          <option [value]="2">February</option>
+          <option [value]="3">March</option>
+          <option [value]="4">April</option>
+          <option [value]="5">May</option>
+          <option [value]="6">June</option>
+          <option [value]="7">July</option>
+          <option [value]="8">August</option>
+          <option [value]="9">September</option>
+          <option [value]="10">October</option>
+          <option [value]="11">November</option>
+          <option [value]="12">December</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Department</label>
+        <select
+          [(ngModel)]="filterDepartment"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+          <option value="all">All Departments</option>
+          <option value="IT">IT</option>
+          <option value="HR">HR</option>
+          <option value="Finance">Finance</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+        <select
+          [(ngModel)]="filterStatus"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+          <option value="all">All Statuses</option>
+          <option value="calculated">Calculated</option>
+          <option value="approved">Approved</option>
+          <option value="transferred">Transferred</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          placeholder="Matricule or name..."
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+      </div>
+    </div>
+  </div>
+
+  <!-- Allowances Table -->
+  <div class="bg-white rounded-lg shadow overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Period</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Days</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Daily Rate</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amount</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        @for (allowance of filteredAllowances(); track allowance.id) {
+          <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="font-medium text-gray-900">{{ allowance.employeeName }}</div>
+              <div class="text-sm text-gray-500">{{ allowance.matricule }}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              {{ allowance.department }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              {{ allowance.month }} {{ allowance.year }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">
+              <div class="text-gray-900">Working: <span class="font-semibold">{{ allowance.workingDays }}</span></div>
+              <div class="text-orange-600">Meal: <span class="font-semibold">{{ allowance.mealDays }}</span></div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+              {{ allowance.premiumAmount }} DH
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-lg font-bold text-orange-600">
+              {{ allowance.totalAmount | number:'1.2-2' }} DH
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span [class]="'px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ' + getStatusColor(allowance.status)">
+                {{ getStatusIcon(allowance.status) }} {{ allowance.status | titlecase }}
+              </span>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+              No meal allowances found
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Calculate Modal -->
+  @if (showCalculateModal()) {
+    <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+      <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <h3 class="text-lg font-bold mb-4">📊 Calculate Meal Allowances</h3>
+        
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Month</label>
+          <select
+            [(ngModel)]="selectedMonth"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+            <option [value]="1">January</option>
+            <option [value]="2">February</option>
+            <option [value]="3">March</option>
+            <option [value]="4">April</option>
+            <option [value]="5">May</option>
+            <option [value]="6">June</option>
+            <option [value]="7">July</option>
+            <option [value]="8">August</option>
+            <option [value]="9">September</option>
+            <option [value]="10">October</option>
+            <option [value]="11">November</option>
+            <option [value]="12">December</option>
+          </select>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Year</label>
+          <input
+            type="number"
+            [(ngModel)]="selectedYear"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+            [min]="2020"
+            [max]="2030">
+        </div>
+
+        <div class="bg-blue-50 border border-blue-200 rounded p-3 mb-4">
+          <p class="text-sm text-blue-800">
+            This will calculate meal allowances for all employees based on their working days and applicable rules.
+          </p>
+        </div>
+
+        <div class="flex justify-end space-x-3">
+          <button
+            (click)="closeCalculateModal()"
+            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"
+            [disabled]="isLoading()">
+            Cancel
+          </button>
+          <button
+            (click)="calculateAllowances()"
+            class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+            [disabled]="isLoading()">
+            @if (isLoading()) {
+              <span>Calculating...</span>
+            } @else {
+              <span>Calculate</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Rules Modal -->
+  @if (showRulesModal()) {
+    <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+      <div class="relative top-20 mx-auto p-5 border w-2/3 shadow-lg rounded-md bg-white">
+        <h3 class="text-lg font-bold mb-4">⚙️ Meal Allowance Rules</h3>
+        
+        <table class="min-w-full divide-y divide-gray-200 mb-4">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Rule Name</th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Daily Amount</th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Min Hours</th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            @for (rule of allowanceRules(); track rule.id) {
+              <tr>
+                <td class="px-4 py-2 text-sm text-gray-900">{{ rule.name }}</td>
+                <td class="px-4 py-2 text-sm font-semibold text-orange-600">{{ rule.dailyAmount }} DH</td>
+                <td class="px-4 py-2 text-sm text-gray-900">{{ rule.workingHoursRequired }}h</td>
+                <td class="px-4 py-2 text-sm">
+                  @if (rule.isActive) {
+                    <span class="text-green-600">✅ Active</span>
+                  } @else {
+                    <span class="text-gray-400">⭕ Inactive</span>
+                  }
+                </td>
+                <td class="px-4 py-2 text-sm">
+                  <button
+                    (click)="openEditRuleModal(rule)"
+                    class="text-indigo-600 hover:text-indigo-900 mr-3">
+                    Edit
+                  </button>
+                  <button
+                    (click)="toggleRuleStatus(rule)"
+                    [class]="rule.isActive ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900'">
+                    {{ rule.isActive ? 'Deactivate' : 'Activate' }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        <div class="flex justify-end">
+          <button
+            (click)="closeRulesModal()"
+            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Edit Rule Modal -->
+  @if (showEditRuleModal() && selectedRule()) {
+    <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+      <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <h3 class="text-lg font-bold mb-4">Edit Rule</h3>
+        
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Rule Name</label>
+          <input
+            type="text"
+            [(ngModel)]="selectedRule()!.name"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Daily Amount (DH)</label>
+          <input
+            type="number"
+            [(ngModel)]="selectedRule()!.dailyAmount"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+            [min]="0"
+            [step]="10">
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Minimum Working Hours</label>
+          <input
+            type="number"
+            [(ngModel)]="selectedRule()!.workingHoursRequired"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+            [min]="1"
+            [max]="24">
+        </div>
+
+        <div class="flex justify-end space-x-3">
+          <button
+            (click)="closeEditRuleModal()"
+            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">
+            Cancel
+          </button>
+          <button
+            (click)="saveRule()"
+            class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700">
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

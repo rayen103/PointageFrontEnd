@@ -1,0 +1,59 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+    <div class="text-center mb-12">
+      <h1 class="text-5xl font-bold text-slate-800 mb-4">Système de Gestion</h1>
+      <p class="text-xl text-slate-600 mb-2">CSTDATACCE_DEP</p>
+      <p class="text-sm text-slate-500">Migration VB6 → .NET 10 + Angular 21</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-8">
+      <!-- Pointage Module -->
+      <a 
+        routerLink="/pointage" 
+        class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-8 border-2 border-transparent hover:border-blue-500 hover:-translate-y-2">
+        <div class="flex flex-col items-center text-center">
+          <div class="text-6xl mb-4 transform group-hover:scale-110 transition-transform duration-300">⏰</div>
+          <h2 class="text-3xl font-bold text-slate-800 mb-3">Pointage</h2>
+          <p class="text-slate-600 mb-6">Gestion du pointage et suivi des présences</p>
+          <div class="mt-auto">
+            <span class="inline-flex items-center text-blue-600 font-semibold group-hover:text-blue-700">
+              Accéder au module
+              <svg class="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </span>
+          </div>
+        </div>
+      </a>
+
+      <!-- GRH Module -->
+      <a 
+        routerLink="/grh" 
+        class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-8 border-2 border-transparent hover:border-purple-500 hover:-translate-y-2">
+        <div class="flex flex-col items-center text-center">
+          <div class="text-6xl mb-4 transform group-hover:scale-110 transition-transform duration-300">👥</div>
+          <h2 class="text-3xl font-bold text-slate-800 mb-3">GRH</h2>
+          <p class="text-slate-600 mb-6">Gestion des ressources humaines et salariés</p>
+          <div class="mt-auto">
+            <span class="inline-flex items-center text-purple-600 font-semibold group-hover:text-purple-700">
+              Accéder au module
+              <svg class="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Database Explorer Link -->
+    <div class="text-center">
+      <a 
+        routerLink="/explorer" 
+        class="inline-flex items-center gap-2 text-slate-600 hover:text-slate-800 transition-colors">
+        <span class="text-2xl">🗄️</span>
+        <span class="text-sm font-medium">Explorateur de Base de Données</span>
+      </a>
+    </div>
+  </div>
+</div>

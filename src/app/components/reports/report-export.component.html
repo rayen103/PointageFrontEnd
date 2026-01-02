@@ -1,0 +1,137 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="report-export-container">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200">
+          <div class="text-xl font-semibold text-slate-900">
+            <span class="text-lg">file_download</span>
+            Exporter un Rapport
+          </div>
+        </div>
+        <div class="p-6">
+          <form [formGroup]="exportForm">
+            <!-- Report Type -->
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-slate-700 mb-2">Type de rapport</label>
+              <select class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-white" formControlName="reportType" required>
+                <option value="presence">Rapport de Présence</option>
+                <option value="department">Rapport par Département</option>
+                <option value="overtime">Rapport des Heures Supplémentaires</option>
+                <option value="delay">Rapport des Retards</option>
+                <option value="leave">Rapport des Congés</option>
+              </select>
+            </div>
+
+            <!-- Export Format -->
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-slate-700 mb-2">Format d'export</label>
+              <select class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-white" formControlName="format" required>
+                <option value="pdf">
+                  <span class="text-lg">picture_as_pdf</span>
+                  PDF
+                </option>
+                <option value="excel">
+                  <span class="text-lg">table_chart</span>
+                  Excel (XLSX)
+                </option>
+                <option value="csv">
+                  <span class="text-lg">description</span>
+                  CSV
+                </option>
+              </select>
+            </div>
+
+            <!-- Date Range -->
+            <div class="date-range">
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-2">Date début</label>
+                <input class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors" type="date" formControlName="startDate" required>
+
+
+              </div>
+
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-2">Date fin</label>
+                <input class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors" type="date" formControlName="endDate" required>
+
+
+              </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-slate-700 mb-2">Service</label>
+              <select class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-white" formControlName="service">
+                <option value="">Tous les services</option>
+                <option value="production">Production</option>
+                <option value="administration">Administration</option>
+                <option value="commercial">Commercial</option>
+                <option value="logistique">Logistique</option>
+                <option value="maintenance">Maintenance</option>
+              </select>
+            </div>
+
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-slate-700 mb-2">Département</label>
+              <select class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-white" formControlName="department">
+                <option value="">Tous les départements</option>
+                <option value="rh">Ressources Humaines</option>
+                <option value="finance">Finance</option>
+                <option value="it">Informatique</option>
+                <option value="operations">Opérations</option>
+              </select>
+            </div>
+
+            <!-- Export Progress -->
+            @if (exporting()) {
+              <div class="progress-container">
+                <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                <p class="progress-text">Génération en cours...</p>
+              </div>
+            }
+
+            <!-- Export Actions -->
+            <div class="actions">
+              <button class="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors shadow-sm" (click)="exportReport()" [disabled]="exportForm.invalid || exporting()">
+                <span class="text-lg">cloud_download</span>
+                Télécharger le Rapport
+              </button>
+              <button class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-slate-100 transition-colors" (click)="resetForm()" [disabled]="exporting()">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                Réinitialiser
+              </button>
+            </div>
+          </form>
+
+          <!-- Format Options Info -->
+          <div class="format-info">
+            <h3>Informations sur les formats :</h3>
+            <div class="format-details">
+              <div class="format-item">
+                <span class="text-lg">picture_as_pdf</span>
+                <div>
+                  <strong>PDF</strong>
+                  <p>Format idéal pour l'impression et le partage. Mise en page professionnelle avec graphiques.</p>
+                </div>
+              </div>
+              <div class="format-item">
+                <span class="text-lg">table_chart</span>
+                <div>
+                  <strong>Excel (XLSX)</strong>
+                  <p>Format modifiable avec formules et tableaux. Idéal pour l'analyse de données.</p>
+                </div>
+              </div>
+              <div class="format-item">
+                <span class="text-lg">description</span>
+                <div>
+                  <strong>CSV</strong>
+                  <p>Format universel compatible avec tous les tableurs. Données brutes sans mise en forme.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

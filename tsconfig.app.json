@@ -1,0 +1,26 @@
+/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
+/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/app",
+    "types": []
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "src/**/*.spec.ts",
+    "src/app/components/reports/**",
+    "src/app/components/employees/**",
+    "src/app/components/leaves/**",
+    "src/app/components/overtime/**",
+    "src/app/components/home/**",
+    "src/app/components/attendance/**",
+    "src/app/components/schedules/employee-shift-assignment.component.ts",
+    "src/app/components/schedules/planning-calendar.component.ts",
+    "src/app/components/schedules/team-management.component.ts",
+    "src/app/components/schedules/shift-management.component.ts",
+    "src/app/components/schedules/team-member-dialog.component.ts"
+  ]
+}

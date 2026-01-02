@@ -1,0 +1,249 @@
+<div class="max-w-screen-2xl mx-auto px-6 py-8 animate-fade-in">
+  <div class="mb-8">
+    <h2 class="text-3xl font-bold text-primary-800 mb-2">Transfert vers la Paie</h2>
+    <p class="text-gray-600">Préparer et transférer les données de pointage vers le système de paie</p>
+  </div>
+
+  <!-- Error Display -->
+  @if (error()) {
+    <div class="alert-danger">
+      <span class="text-2xl">⚠️</span>
+      <span>{{ error() }}</span>
+      <button (click)="error.set(null)" class="ml-auto bg-transparent border-none text-2xl cursor-pointer hover:opacity-70">×</button>
+    </div>
+  }
+
+  <!-- Success Message -->
+  @if (transferCompleted()) {
+    <div class="alert-success">
+      <span class="text-2xl">✅</span>
+      <span>Transfert effectué avec succès pour {{ employeeData().length }} employés</span>
+      <button (click)="reset()" class="btn-secondary">Nouveau transfert</button>
+    </div>
+  }
+
+  <!-- Period Selection -->
+  <div class="card mb-6 animate-slide-in-up">
+    <div class="card-header">
+      <h3 class="card-title">Sélection de la période</h3>
+    </div>
+    
+    <div class="flex gap-6 mb-6">
+      <label class="flex items-center gap-2 cursor-pointer font-medium">
+        <input type="radio" name="transferMode" value="monthly" [(ngModel)]="transferMode" (change)="onTransferModeChange()" class="cursor-pointer">
+        Mensuel
+      </label>
+      <label class="flex items-center gap-2 cursor-pointer font-medium">
+        <input type="radio" name="transferMode" value="weekly" [(ngModel)]="transferMode" class="cursor-pointer">
+        Hebdomadaire
+      </label>
+      <label class="flex items-center gap-2 cursor-pointer font-medium">
+        <input type="radio" name="transferMode" value="custom" [(ngModel)]="transferMode" class="cursor-pointer">
+        Personnalisé
+      </label>
+    </div>
+
+    @if (transferMode === 'monthly') {
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div class="form-group">
+          <label class="label-field">Mois:</label>
+          <select [(ngModel)]="selectedMonth" (change)="onMonthYearChange()" class="input-field">
+            @for (month of months; track month.value) {
+              <option [value]="month.value">{{ month.label }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="label-field">Année:</label>
+          <select [(ngModel)]="selectedYear" (change)="onMonthYearChange()" class="input-field">
+            @for (year of years; track year) {
+              <option [value]="year">{{ year }}</option>
+            }
+          </select>
+        </div>
+      </div>
+    }
+
+    <div class="grid grid-cols-2 gap-4 mb-6">
+      <div class="form-group">
+        <label class="label-field">Date début:</label>
+        <input type="date" [(ngModel)]="dateDebut" class="input-field" [disabled]="transferMode === 'monthly'">
+      </div>
+      <div class="form-group">
+        <label class="label-field">Date fin:</label>
+        <input type="date" [(ngModel)]="dateFin" class="input-field" [disabled]="transferMode === 'monthly'">
+      </div>
+    </div>
+
+    <button (click)="loadPayrollData()" [disabled]="loading()" class="btn-primary">
+      @if (loading()) {
+        ⏳ Chargement en cours...
+      } @else {
+        📊 Charger les données
+      }
+    </button>
+  </div>
+
+  <!-- Summary -->
+  @if (employeeData().length > 0 && !transferCompleted()) {
+    <div class="card mb-6 animate-scale-in">
+      <div class="card-header">
+        <h3 class="card-title">Récapitulatif</h3>
+      </div>
+      <div class="grid grid-cols-5 gap-4 mb-6">
+        <div class="text-center p-6 bg-gray-50 rounded-lg shadow-soft hover:shadow-soft-lg transition-shadow">
+          <div class="text-3xl font-bold text-primary-600 mb-2">{{ summary().totalEmployees }}</div>
+          <div class="text-sm text-gray-600">Employés</div>
+        </div>
+        <div class="text-center p-6 bg-gray-50 rounded-lg shadow-soft hover:shadow-soft-lg transition-shadow">
+          <div class="text-3xl font-bold text-primary-600 mb-2">{{ summary().totalHeures }} h</div>
+          <div class="text-sm text-gray-600">Heures travaillées</div>
+        </div>
+        <div class="text-center p-6 bg-gray-50 rounded-lg shadow-soft hover:shadow-soft-lg transition-shadow">
+          <div class="text-3xl font-bold text-primary-600 mb-2">{{ summary().totalHS }} h</div>
+          <div class="text-sm text-gray-600">Heures supplémentaires</div>
+        </div>
+        <div class="text-center p-6 bg-gray-50 rounded-lg shadow-soft hover:shadow-soft-lg transition-shadow">
+          <div class="text-3xl font-bold text-primary-600 mb-2">{{ summary().totalRetards }}</div>
+          <div class="text-sm text-gray-600">Retards</div>
+        </div>
+        <div class="text-center p-6 bg-gray-50 rounded-lg shadow-soft hover:shadow-soft-lg transition-shadow">
+          <div class="text-3xl font-bold text-primary-600 mb-2">{{ summary().totalAbsences }}</div>
+          <div class="text-sm text-gray-600">Absences</div>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <div class="h-8 bg-gray-200 rounded-full overflow-hidden">
+          <div class="h-full bg-gradient-to-r from-success-500 to-success-600 transition-all duration-300" 
+               [style.width.%]="(validatedCount() / employeeData().length) * 100"></div>
+        </div>
+        <p class="text-center text-gray-700 font-medium">{{ validatedCount() }} / {{ employeeData().length }} employés validés</p>
+        @if (hasErrors()) {
+          <p class="text-danger-600 text-center font-medium">⚠️ Certains employés ont des erreurs à corriger</p>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Employee Data Table -->
+  @if (employeeData().length > 0 && !transferCompleted()) {
+    <div class="card mb-6 animate-slide-in-up">
+      <div class="card-header">
+        <h3 class="card-title">Données des employés</h3>
+        <div class="flex gap-2">
+          <button (click)="validateAll()" class="btn-secondary btn-sm" [disabled]="hasErrors()">
+            ✓ Valider tous
+          </button>
+          <button (click)="exportToExcel()" class="btn-secondary btn-sm">
+            📥 Exporter Excel
+          </button>
+          @if (hasErrors()) {
+            <button (click)="exportErrors()" class="btn-secondary btn-sm">
+              📤 Exporter erreurs
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="table">
+          <thead class="table-header">
+            <tr>
+              <th class="table-header-cell">Statut</th>
+              <th class="table-header-cell">Matricule</th>
+              <th class="table-header-cell">Nom & Prénom</th>
+              <th class="table-header-cell">Heures</th>
+              <th class="table-header-cell">H.Sup</th>
+              <th class="table-header-cell">Retards</th>
+              <th class="table-header-cell">Absences</th>
+              <th class="table-header-cell">Congés</th>
+              <th class="table-header-cell">Primes</th>
+              <th class="table-header-cell">H.Nuit</th>
+              <th class="table-header-cell">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="table-body">
+            @for (employee of employeeData(); track employee.matricule) {
+              <tr class="table-row" [class.bg-danger-50]="employee.errors.length > 0" [class.bg-success-50]="employee.validated">
+                <td class="table-cell text-center">
+                  <span [matTooltip]="getStatusLabel(employee)">{{ getStatusIcon(employee) }}</span>
+                </td>
+                <td class="table-cell">{{ employee.matricule }}</td>
+                <td class="table-cell">{{ employee.nomPrenom }}</td>
+                <td class="table-cell text-right">{{ employee.heuresTravaillees }} h</td>
+                <td class="table-cell text-right">{{ employee.heuresSupplementaires }} h</td>
+                <td class="table-cell text-right">{{ employee.retards }}</td>
+                <td class="table-cell text-right">{{ employee.absences }}</td>
+                <td class="table-cell text-right">{{ employee.conges }}</td>
+                <td class="table-cell text-right">{{ employee.primesPanier }}</td>
+                <td class="table-cell text-right">{{ employee.heuresNuit }} h</td>
+                <td class="table-cell">
+                  <div class="flex gap-1 justify-center">
+                    @if (!employee.validated && employee.errors.length === 0) {
+                      <button (click)="validateEmployee(employee.matricule)" class="btn-success btn-sm">
+                        ✓
+                      </button>
+                    }
+                    @if (employee.errors.length > 0) {
+                      <button class="btn-danger btn-sm" [matTooltip]="employee.errors.join(', ')">
+                        !
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+              @if (employee.errors.length > 0) {
+                <tr class="bg-danger-50">
+                  <td colspan="11" class="p-4">
+                    <div class="text-danger-800">
+                      <strong>Erreurs:</strong>
+                      <ul class="list-disc ml-6 mt-2">
+                        @for (error of employee.errors; track $index) {
+                          <li>{{ error }}</li>
+                        }
+                      </ul>
+                    </div>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- Transfer Actions -->
+  @if (employeeData().length > 0 && !transferCompleted()) {
+    <div class="space-y-4 animate-bounce-in">
+      <div class="alert-warning">
+        <p><strong>⚠️ Attention:</strong> Le transfert vers la paie est une opération irréversible.</p>
+        <p>Assurez-vous que toutes les données sont correctes avant de procéder.</p>
+      </div>
+      
+      <button 
+        (click)="transferToPayroll()" 
+        [disabled]="!canTransfer() || loading()"
+        class="btn-primary btn-lg w-full">
+        @if (loading()) {
+          ⏳ Transfert en cours...
+        } @else {
+          💼 Transférer vers la paie
+        }
+      </button>
+    </div>
+  }
+
+  <!-- Loading Overlay -->
+  @if (loading()) {
+    <div class="modal-overlay">
+      <div class="modal-container max-w-sm">
+        <div class="modal-content text-center">
+          <div class="spinner spinner-lg mx-auto mb-4"></div>
+          <p class="text-lg font-medium">Traitement en cours...</p>
+        </div>
+      </div>
+    </div>
+  }
+</div>

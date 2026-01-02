@@ -1,0 +1,242 @@
+<div class="container mx-auto p-6">
+  <!-- Header -->
+  <div class="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg shadow-lg p-6 mb-6 text-white">
+    <div class="flex justify-between items-center">
+      <div>
+        <h1 class="text-3xl font-bold mb-2">🚪 Exit Authorization Management</h1>
+        <p class="text-purple-100">Manage early departure requests and authorizations</p>
+      </div>
+      <button
+        (click)="openNewModal()"
+        class="bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-purple-50 transition-colors shadow-md">
+        + New Authorization Request
+      </button>
+    </div>
+  </div>
+
+  <!-- Success/Error Messages -->
+  @if (successMessage()) {
+    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+      {{ successMessage() }}
+    </div>
+  }
+  @if (errorMessage()) {
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <!-- Statistics Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-lg shadow p-4">
+      <div class="text-gray-500 text-sm mb-1">Total Requests</div>
+      <div class="text-3xl font-bold text-gray-800">{{ stats().total }}</div>
+    </div>
+    <div class="bg-yellow-50 rounded-lg shadow p-4">
+      <div class="text-yellow-600 text-sm mb-1">Pending</div>
+      <div class="text-3xl font-bold text-yellow-700">{{ stats().pending }}</div>
+    </div>
+    <div class="bg-green-50 rounded-lg shadow p-4">
+      <div class="text-green-600 text-sm mb-1">Approved</div>
+      <div class="text-3xl font-bold text-green-700">{{ stats().approved }}</div>
+    </div>
+    <div class="bg-red-50 rounded-lg shadow p-4">
+      <div class="text-red-600 text-sm mb-1">Rejected</div>
+      <div class="text-3xl font-bold text-red-700">{{ stats().rejected }}</div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white rounded-lg shadow p-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Status Filter</label>
+        <select
+          [(ngModel)]="filterStatus"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+          <option value="all">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Date Filter</label>
+        <input
+          type="date"
+          [(ngModel)]="filterDate"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          placeholder="Matricule or name..."
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+      </div>
+    </div>
+  </div>
+
+  <!-- Authorizations List -->
+  <div class="bg-white rounded-lg shadow overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Exit Time</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requested</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        @for (auth of filteredAuthorizations(); track auth.id) {
+          <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="font-medium text-gray-900">{{ auth.employeeName }}</div>
+              <div class="text-sm text-gray-500">{{ auth.matricule }}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              {{ auth.date }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-purple-600">
+              {{ auth.exitTime }}
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-900">
+              {{ auth.reason }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ auth.requestedAt }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span [class]="'px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ' + getStatusColor(auth.status)">
+                {{ getStatusIcon(auth.status) }} {{ auth.status | titlecase }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              @if (auth.status === 'pending') {
+                <button
+                  (click)="openApprovalModal(auth)"
+                  class="text-indigo-600 hover:text-indigo-900 mr-3">
+                  Review
+                </button>
+              }
+              @if (auth.status !== 'pending') {
+                <span class="text-gray-400">{{ auth.approvedBy }}</span>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+              No authorization requests found
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- New Authorization Modal -->
+  @if (showNewModal()) {
+    <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+      <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <h3 class="text-lg font-bold mb-4">New Exit Authorization Request</h3>
+        
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Matricule *</label>
+          <input
+            type="text"
+            [(ngModel)]="newAuthorization().matricule"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+            placeholder="Employee matricule">
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Date *</label>
+          <input
+            type="date"
+            [(ngModel)]="newAuthorization().date"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Exit Time *</label>
+          <input
+            type="time"
+            [(ngModel)]="newAuthorization().exitTime"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Reason *</label>
+          <textarea
+            [(ngModel)]="newAuthorization().reason"
+            rows="3"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+            placeholder="Reason for early departure"></textarea>
+        </div>
+
+        <div class="flex justify-end space-x-3">
+          <button
+            (click)="closeNewModal()"
+            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">
+            Cancel
+          </button>
+          <button
+            (click)="submitNewAuthorization()"
+            class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+            Submit Request
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Approval Modal -->
+  @if (showApprovalModal() && selectedAuthorization()) {
+    <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+      <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <h3 class="text-lg font-bold mb-4">Review Authorization Request</h3>
+        
+        <div class="mb-4 p-3 bg-gray-50 rounded">
+          <div class="mb-2"><strong>Employee:</strong> {{ selectedAuthorization()!.employeeName }}</div>
+          <div class="mb-2"><strong>Matricule:</strong> {{ selectedAuthorization()!.matricule }}</div>
+          <div class="mb-2"><strong>Date:</strong> {{ selectedAuthorization()!.date }}</div>
+          <div class="mb-2"><strong>Exit Time:</strong> {{ selectedAuthorization()!.exitTime }}</div>
+          <div><strong>Reason:</strong> {{ selectedAuthorization()!.reason }}</div>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Comments</label>
+          <textarea
+            [(ngModel)]="approvalComments"
+            rows="3"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+            placeholder="Optional comments..."></textarea>
+        </div>
+
+        <div class="flex justify-end space-x-3">
+          <button
+            (click)="closeApprovalModal()"
+            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">
+            Cancel
+          </button>
+          <button
+            (click)="rejectAuthorization()"
+            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+            ❌ Reject
+          </button>
+          <button
+            (click)="approveAuthorization()"
+            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+            ✅ Approve
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

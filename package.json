@@ -1,0 +1,61 @@
+{
+  "name": "pointage-app",
+  "version": "1.0.0",
+  "description": "Pointage (Time & Attendance) Management Application",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve --port 4200",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "singleQuote": true,
+    "overrides": [
+      {
+        "files": "*.html",
+        "options": {
+          "parser": "angular"
+        }
+      }
+    ]
+  },
+  "private": true,
+  "packageManager": "npm@11.6.2",
+  "dependencies": {
+    "@angular/animations": "^21.0.6",
+    "@angular/cdk": "^21.0.0",
+    "@angular/common": "^21.0.6",
+    "@angular/compiler": "^21.0.6",
+    "@angular/core": "^21.0.6",
+    "@angular/forms": "^21.0.6",
+    "@angular/material": "^21.0.0",
+    "@angular/platform-browser": "^21.0.6",
+    "@angular/platform-browser-dynamic": "^21.0.6",
+    "@angular/router": "^21.0.6",
+    "@tailwindcss/postcss": "^4.1.18",
+    "chart.js": "^4.4.0",
+    "date-fns": "^3.0.0",
+    "ng2-charts": "^6.0.0",
+    "ngx-skeleton-loader": "^9.0.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0",
+    "zone.js": "^0.15.0"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^21.0.3",
+    "@angular-devkit/core": "^21.0.3",
+    "@angular-devkit/schematics": "^21.0.3",
+    "@angular/build": "^21.0.3",
+    "@angular/cli": "^21.0.3",
+    "@angular/compiler-cli": "^21.0.6",
+    "@schematics/angular": "^21.0.3",
+    "autoprefixer": "^10.4.23",
+    "jsdom": "^27.1.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.19",
+    "typescript": "~5.9.2",
+    "vitest": "^4.0.8"
+  }
+}

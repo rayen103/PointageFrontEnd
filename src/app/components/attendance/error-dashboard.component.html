@@ -1,0 +1,205 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold text-slate-900">Tableau de Bord des Erreurs</h1>
+      <p class="text-slate-600 mt-1">Vue d'ensemble des erreurs et anomalies de pointage</p>
+    </div>
+
+    @if (loading()) {
+      <div class="flex justify-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-4 border-red-200 border-t-red-600"></div>
+      </div>
+    } @else if (error()) {
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+        <svg class="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <div class="flex-1">
+          <p class="text-sm font-medium text-red-800">{{ error() }}</p>
+        </div>
+        <button class="text-red-500 hover:text-red-700" (click)="loadDashboard()">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+        </button>
+      </div>
+    } @else if (dashboard()) {
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <!-- Total Open Errors -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow cursor-pointer"
+             (click)="viewAllErrors()">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-slate-600">Erreurs Ouvertes</p>
+              <p class="text-3xl font-bold text-slate-900 mt-2">{{ dashboard()!.totalOpenErrors }}</p>
+              <p class="text-xs text-slate-500 mt-1">Au {{ dashboard()!.asOfDate }}</p>
+            </div>
+            <div class="bg-red-100 rounded-full p-3">
+              <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Critical Errors -->
+        <div class="bg-white rounded-xl shadow-sm border-2 border-red-200 p-6 hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-red-600">Critiques</p>
+              <p class="text-3xl font-bold text-red-700 mt-2">{{ dashboard()!.criticalCount }}</p>
+              <p class="text-xs text-red-500 mt-1">{{ criticalPercentage() }}% du total</p>
+            </div>
+            <div class="bg-red-100 rounded-full p-3">
+              <svg class="w-8 h-8 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- High Priority -->
+        <div class="bg-white rounded-xl shadow-sm border border-orange-200 p-6 hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-orange-600">Haute Priorité</p>
+              <p class="text-3xl font-bold text-orange-700 mt-2">{{ dashboard()!.highCount }}</p>
+              <p class="text-xs text-orange-500 mt-1">Nécessite attention</p>
+            </div>
+            <div class="bg-orange-100 rounded-full p-3">
+              <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Today's Activity -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-slate-600">Activité Aujourd'hui</p>
+              <div class="flex items-baseline gap-3 mt-2">
+                <div>
+                  <p class="text-lg font-bold text-green-600">+{{ dashboard()!.resolvedToday }}</p>
+                  <p class="text-xs text-green-500">Résolues</p>
+                </div>
+                <div>
+                  <p class="text-lg font-bold text-red-600">+{{ dashboard()!.newToday }}</p>
+                  <p class="text-xs text-red-500">Nouvelles</p>
+                </div>
+              </div>
+            </div>
+            <div class="bg-blue-100 rounded-full p-3">
+              <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Errors by Type -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <h3 class="text-lg font-semibold text-slate-900 mb-4">Erreurs par Type</h3>
+          <div class="space-y-3">
+            @for (entry of getErrorTypeEntries(); track entry[0]) {
+              <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+                   (click)="viewErrorsByType(entry[0])">
+                <div class="flex items-center gap-3 flex-1">
+                  <div class="bg-red-100 rounded-full p-2">
+                    <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <span class="text-sm font-medium text-slate-700">{{ entry[0] }}</span>
+                </div>
+                <span class="text-lg font-bold text-slate-900">{{ entry[1] }}</span>
+              </div>
+            } @empty {
+              <p class="text-sm text-slate-500 text-center py-4">Aucune erreur par type</p>
+            }
+          </div>
+        </div>
+
+        <!-- Severity Breakdown -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <h3 class="text-lg font-semibold text-slate-900 mb-4">Répartition par Sévérité</h3>
+          <div class="space-y-4">
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="font-medium text-red-600">Critique</span>
+                <span class="font-bold text-red-700">{{ dashboard()!.criticalCount }}</span>
+              </div>
+              <div class="w-full bg-slate-200 rounded-full h-3">
+                <div class="bg-red-600 h-3 rounded-full transition-all duration-500"
+                     [style.width.%]="(dashboard()!.criticalCount / totalErrors()) * 100"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="font-medium text-orange-600">Haute</span>
+                <span class="font-bold text-orange-700">{{ dashboard()!.highCount }}</span>
+              </div>
+              <div class="w-full bg-slate-200 rounded-full h-3">
+                <div class="bg-orange-500 h-3 rounded-full transition-all duration-500"
+                     [style.width.%]="(dashboard()!.highCount / totalErrors()) * 100"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="font-medium text-yellow-600">Moyenne</span>
+                <span class="font-bold text-yellow-700">{{ dashboard()!.mediumCount }}</span>
+              </div>
+              <div class="w-full bg-slate-200 rounded-full h-3">
+                <div class="bg-yellow-500 h-3 rounded-full transition-all duration-500"
+                     [style.width.%]="(dashboard()!.mediumCount / totalErrors()) * 100"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="font-medium text-blue-600">Basse</span>
+                <span class="font-bold text-blue-700">{{ dashboard()!.lowCount }}</span>
+              </div>
+              <div class="w-full bg-slate-200 rounded-full h-3">
+                <div class="bg-blue-500 h-3 rounded-full transition-all duration-500"
+                     [style.width.%]="(dashboard()!.lowCount / totalErrors()) * 100"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="mt-6 flex gap-4">
+        <button 
+          class="inline-flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm"
+          (click)="viewAllErrors()">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          Voir Toutes les Erreurs
+        </button>
+        <button 
+          class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+          (click)="viewWeeklyAnomalies()">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          Anomalies Hebdomadaires
+        </button>
+        <button 
+          class="inline-flex items-center gap-2 px-6 py-3 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors ml-auto"
+          (click)="loadDashboard()">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Actualiser
+        </button>
+      </div>
+    }
+  </div>
+</div>

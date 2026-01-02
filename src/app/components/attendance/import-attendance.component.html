@@ -1,0 +1,264 @@
+<div class="max-w-screen-2xl mx-auto px-6 py-8 animate-fade-in">
+  <div class="mb-8">
+    <h2 class="text-3xl font-bold text-primary-800 mb-2">Import de Pointages</h2>
+    <p class="text-gray-600">Importer les pointages depuis un fichier ou une pointeuse</p>
+  </div>
+
+  <!-- Source Selection -->
+  <div class="flex gap-3 mb-6 animate-slide-in-up">
+    <button 
+      [class.active]="importSource === 'file'"
+      (click)="importSource = 'file'"
+      class="btn-secondary flex-1"
+      [class.!bg-primary-100]="importSource === 'file'"
+      [class.!border-primary-600]="importSource === 'file'"
+      [class.!text-primary-800]="importSource === 'file'">
+      📁 Fichier
+    </button>
+    <button 
+      [class.active]="importSource === 'device'"
+      (click)="importSource = 'device'"
+      class="btn-secondary flex-1"
+      [class.!bg-primary-100]="importSource === 'device'"
+      [class.!border-primary-600]="importSource === 'device'"
+      [class.!text-primary-800]="importSource === 'device'">
+      🔒 Pointeuses
+    </button>
+    <button 
+      [class.active]="importSource === 'text'"
+      (click)="importSource = 'text'"
+      class="btn-secondary flex-1"
+      [class.!bg-primary-100]="importSource === 'text'"
+      [class.!border-primary-600]="importSource === 'text'"
+      [class.!text-primary-800]="importSource === 'text'">
+      📝 Texte
+    </button>
+  </div>
+
+  <!-- Error Display -->
+  @if (error()) {
+    <div class="alert-danger">
+      <span class="text-2xl">⚠️</span>
+      <span>{{ error() }}</span>
+      <button (click)="error.set(null)" class="ml-auto bg-transparent border-none text-2xl cursor-pointer hover:opacity-70">×</button>
+    </div>
+  }
+
+  <!-- File Import -->
+  @if (importSource === 'file') {
+    <div class="card mb-6 animate-scale-in">
+      <div class="card-header">
+        <h3 class="card-title">Import depuis un fichier</h3>
+      </div>
+      
+      <div class="flex gap-6 mb-6">
+        <label class="flex items-center gap-2 cursor-pointer font-medium">
+          <input type="radio" name="fileType" value="csv" [(ngModel)]="fileType" class="cursor-pointer">
+          CSV / Texte délimité
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer font-medium">
+          <input type="radio" name="fileType" value="excel" [(ngModel)]="fileType" class="cursor-pointer">
+          Excel (.xlsx, .xls)
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer font-medium">
+          <input type="radio" name="fileType" value="access" [(ngModel)]="fileType" class="cursor-pointer">
+          Access Control (.dat, .txt)
+        </label>
+      </div>
+
+      <div class="mb-6">
+        <input 
+          type="file" 
+          id="fileInput"
+          (change)="onFileSelected($event)"
+          accept=".csv,.txt,.xlsx,.xls,.dat"
+          class="hidden">
+        <label for="fileInput" class="btn-secondary block text-center cursor-pointer">
+          @if (selectedFile) {
+            <span>📄 {{ selectedFile.name }}</span>
+          } @else {
+            <span>Sélectionner un fichier...</span>
+          }
+        </label>
+      </div>
+
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <p class="font-semibold text-gray-800 mb-1">Format attendu:</p>
+        <p class="text-gray-700">Matricule, Nom, Date, Heure, Type (E/S)</p>
+        <p class="text-gray-600 mt-2 italic">Exemple: 001, DUPONT Jean, 2024-01-15, 08:30:00, E</p>
+      </div>
+
+      <button 
+        (click)="importFromFile()" 
+        [disabled]="!selectedFile || loading()"
+        class="btn-primary">
+        @if (loading()) {
+          ⏳ Import en cours...
+        } @else {
+          📥 Importer
+        }
+      </button>
+    </div>
+  }
+
+  <!-- Device Import -->
+  @if (importSource === 'device') {
+    <div class="card mb-6 animate-scale-in">
+      <div class="card-header">
+        <h3 class="card-title">Import depuis les pointeuses</h3>
+      </div>
+      
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <div class="form-group">
+          <label class="label-field">Date début:</label>
+          <input type="date" [(ngModel)]="dateDebut" class="input-field">
+        </div>
+        <div class="form-group">
+          <label class="label-field">Date fin:</label>
+          <input type="date" [(ngModel)]="dateFin" class="input-field">
+        </div>
+      </div>
+
+      <div class="mb-6">
+        <h4 class="text-lg font-semibold text-gray-800 mb-3">Sélectionner les pointeuses:</h4>
+        <div class="space-y-2">
+          @for (device of availableDevices; track device.id) {
+            <label class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
+              <input 
+                type="checkbox" 
+                [checked]="selectedDevices.includes(device.id)"
+                (change)="onDeviceToggle(device.id)"
+                class="w-5 h-5">
+              <span class="font-medium">{{ device.name }} ({{ device.id }})</span>
+            </label>
+          }
+        </div>
+      </div>
+
+      <button 
+        (click)="importFromDevices()" 
+        [disabled]="selectedDevices.length === 0 || loading()"
+        class="btn-primary">
+        @if (loading()) {
+          ⏳ Récupération en cours...
+        } @else {
+          🔄 Récupérer les pointages
+        }
+      </button>
+    </div>
+  }
+
+  <!-- Text Import -->
+  @if (importSource === 'text') {
+    <div class="card mb-6 animate-scale-in">
+      <div class="card-header">
+        <h3 class="card-title">Import depuis texte</h3>
+        <p class="text-gray-600 text-sm">Collez les données de pointage au format texte délimité</p>
+      </div>
+      <textarea 
+        class="input-field min-h-[200px] font-mono" 
+        placeholder="Matricule, Nom, Date, Heure, Type&#10;001, DUPONT Jean, 2024-01-15, 08:30:00, E&#10;002, MARTIN Marie, 2024-01-15, 08:35:00, E"
+        rows="10">
+      </textarea>
+      <button class="btn-primary mt-4" [disabled]="loading()">
+        📥 Importer
+      </button>
+    </div>
+  }
+
+  <!-- Import Summary -->
+  @if (summary().total > 0) {
+    <div class="card mb-6 animate-bounce-in">
+      <div class="card-header">
+        <h3 class="card-title">Résumé de l'import</h3>
+      </div>
+      <div class="grid grid-cols-4 gap-4 mb-6">
+        <div class="text-center p-6 bg-gray-100 rounded-lg">
+          <div class="text-3xl font-bold text-gray-700 mb-2">{{ summary().total }}</div>
+          <div class="text-sm text-gray-600">Total</div>
+        </div>
+        <div class="text-center p-6 bg-success-100 rounded-lg">
+          <div class="text-3xl font-bold text-success-700 mb-2">{{ summary().success }}</div>
+          <div class="text-sm text-success-600">Succès</div>
+        </div>
+        <div class="text-center p-6 bg-danger-100 rounded-lg">
+          <div class="text-3xl font-bold text-danger-700 mb-2">{{ summary().errors }}</div>
+          <div class="text-sm text-danger-600">Erreurs</div>
+        </div>
+        <div class="text-center p-6 bg-warning-100 rounded-lg">
+          <div class="text-3xl font-bold text-warning-700 mb-2">{{ summary().duplicates }}</div>
+          <div class="text-sm text-warning-600">Doublons</div>
+        </div>
+      </div>
+
+      <div class="flex gap-3">
+        <button (click)="exportErrors()" class="btn-secondary" [disabled]="summary().errors === 0">
+          📤 Exporter les erreurs
+        </button>
+        <button (click)="clearImport()" class="btn-secondary">
+          🗑️ Effacer
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Import Results Table -->
+  @if (records().length > 0) {
+    <div class="card mb-6 animate-slide-in-up">
+      <div class="card-header">
+        <h3 class="card-title">Détail des enregistrements ({{ records().length }})</h3>
+      </div>
+      
+      <div class="table-container">
+        <table class="table">
+          <thead class="table-header">
+            <tr>
+              <th class="table-header-cell">Statut</th>
+              <th class="table-header-cell">Matricule</th>
+              <th class="table-header-cell">Nom & Prénom</th>
+              <th class="table-header-cell">Date & Heure</th>
+              <th class="table-header-cell">Type</th>
+              <th class="table-header-cell">Pointeuse</th>
+              <th class="table-header-cell">Message</th>
+            </tr>
+          </thead>
+          <tbody class="table-body">
+            @for (record of records(); track $index) {
+              <tr class="table-row" 
+                  [class.bg-success-50]="record.status === 'success'"
+                  [class.bg-danger-50]="record.status === 'error'"
+                  [class.bg-warning-50]="record.status === 'duplicate'">
+                <td class="table-cell text-center">
+                  <span class="text-xl">{{ getStatusIcon(record.status) }}</span>
+                </td>
+                <td class="table-cell">{{ record.matricule }}</td>
+                <td class="table-cell">{{ record.nomPrenom }}</td>
+                <td class="table-cell">{{ record.dateTime | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+                <td class="table-cell">
+                  <span class="badge-success" *ngIf="record.type === 'E'">Entrée</span>
+                  <span class="badge-danger" *ngIf="record.type === 'S'">Sortie</span>
+                </td>
+                <td class="table-cell">{{ record.deviceId }}</td>
+                <td class="table-cell text-sm text-gray-600">
+                  {{ record.errorMessage || '-' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- Loading Overlay -->
+  @if (loading()) {
+    <div class="modal-overlay">
+      <div class="modal-container max-w-sm">
+        <div class="modal-content text-center">
+          <div class="spinner spinner-lg mx-auto mb-4"></div>
+          <p class="text-lg font-medium">Traitement en cours...</p>
+        </div>
+      </div>
+    </div>
+  }
+</div>

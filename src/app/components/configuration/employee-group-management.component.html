@@ -1,0 +1,127 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200">
+      <div class="px-6 py-4 border-b border-slate-200">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-2xl font-bold text-slate-900">Gestion des Groupes d'Employés</h2>
+            <p class="text-sm text-slate-600 mt-1">Organiser les employés en groupes</p>
+          </div>
+          <button class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                  (click)="openForm()">
+            + Nouveau Groupe
+          </button>
+        </div>
+      </div>
+
+      <div class="p-6">
+        <!-- Messages -->
+        @if (error()) {
+          <div class="mb-4 bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">{{ error() }}</div>
+        }
+        @if (success()) {
+          <div class="mb-4 bg-green-50 border border-green-200 rounded-lg p-4 text-sm text-green-700">{{ success() }}</div>
+        }
+
+        <!-- Groups Grid -->
+        @if (loading()) {
+          <div class="flex justify-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-indigo-200 border-t-indigo-600"></div>
+          </div>
+        } @else if (groups().length > 0) {
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @for (group of groups(); track group.id) {
+              <div class="border border-slate-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-start justify-between mb-4">
+                  <div>
+                    <h3 class="text-lg font-semibold text-slate-900">{{ group.nom }}</h3>
+                    <p class="text-sm text-slate-500">Code: {{ group.code }}</p>
+                  </div>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                        [class]="group.actif ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">
+                    {{ group.actif ? 'Actif' : 'Inactif' }}
+                  </span>
+                </div>
+
+                <p class="text-sm text-slate-600 mb-4">{{ group.description }}</p>
+
+                <div class="flex items-center text-sm text-slate-500 mb-4">
+                  <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  {{ group.nombreEmployes }} employé(s)
+                </div>
+
+                <div class="flex gap-2">
+                  <button class="flex-1 px-3 py-2 text-sm bg-blue-50 text-blue-700 rounded hover:bg-blue-100"
+                          (click)="openForm(group)">
+                    Modifier
+                  </button>
+                  <button class="flex-1 px-3 py-2 text-sm bg-orange-50 text-orange-700 rounded hover:bg-orange-100"
+                          (click)="toggleStatus(group)">
+                    {{ group.actif ? 'Désactiver' : 'Activer' }}
+                  </button>
+                  <button class="px-3 py-2 text-sm bg-red-50 text-red-700 rounded hover:bg-red-100"
+                          (click)="deleteGroup(group.id)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="text-center py-12 text-slate-500">
+            <svg class="w-16 h-16 text-slate-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <p>Aucun groupe trouvé</p>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Group Form Modal -->
+    @if (showForm()) {
+      <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" (click)="showForm.set(false)">
+        <div class="bg-white rounded-lg p-6 max-w-lg w-full mx-4" (click)="$event.stopPropagation()">
+          <h3 class="text-lg font-bold text-slate-900 mb-4">
+            {{ editingGroup() ? 'Modifier le Groupe' : 'Nouveau Groupe' }}
+          </h3>
+          
+          <div class="space-y-4 mb-6">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">Code *</label>
+              <input type="text" class="w-full px-4 py-2 border border-slate-300 rounded-lg"
+                     [disabled]="!!editingGroup()"
+                     [ngModel]="groupForm().code"
+                     (ngModelChange)="updateGroupForm('code', $event)">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">Nom *</label>
+              <input type="text" class="w-full px-4 py-2 border border-slate-300 rounded-lg"
+                     [ngModel]="groupForm().nom"
+                     (ngModelChange)="updateGroupForm('nom', $event)">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">Description</label>
+              <textarea class="w-full px-4 py-2 border border-slate-300 rounded-lg resize-none" rows="3"
+                        [ngModel]="groupForm().description"
+                        (ngModelChange)="updateGroupForm('description', $event)"></textarea>
+            </div>
+          </div>
+
+          <div class="flex gap-3">
+            <button class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700" (click)="saveGroup()">
+              Enregistrer
+            </button>
+            <button class="px-6 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300" (click)="showForm.set(false)">
+              Annuler
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

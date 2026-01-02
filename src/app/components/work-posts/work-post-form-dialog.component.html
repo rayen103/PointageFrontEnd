@@ -1,0 +1,131 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Modifier le Poste' : 'Nouveau Poste' }}</h2>
+
+<mat-dialog-content>
+    <form [formGroup]="form" class="work-post-form">
+        <!-- Basic Information -->
+        <div class="form-section">
+            <h4>Informations de base</h4>
+
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Code Société</mat-label>
+                <input matInput formControlName="codeSoc" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Code Poste</mat-label>
+                <input matInput formControlName="codePoste" />
+                <mat-error *ngIf="form.get('codePoste')?.hasError('required')">
+                    Code poste requis
+                </mat-error>
+                <mat-error *ngIf="form.get('codePoste')?.hasError('maxlength')">
+                    Maximum 20 caractères
+                </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Désignation</mat-label>
+                <input matInput formControlName="desigPoste" />
+                <mat-error *ngIf="form.get('desigPoste')?.hasError('required')">
+                    Désignation requise
+                </mat-error>
+            </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Schedule -->
+        <div class="form-section">
+            <h4>Horaires</h4>
+
+            <div class="form-row">
+                <mat-form-field appearance="outline">
+                    <mat-label>Heure Début</mat-label>
+                    <input matInput type="time" formControlName="heureDeb" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Heure Fin</mat-label>
+                    <input matInput type="time" formControlName="heureFin" />
+                </mat-form-field>
+            </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Tolerances -->
+        <div class="form-section">
+            <h4>Tolérances</h4>
+
+            <div class="form-row">
+                <mat-form-field appearance="outline">
+                    <mat-label>Retard Permis (min)</mat-label>
+                    <input matInput type="number" formControlName="retardPermis" min="0" max="120" />
+                    <mat-error
+                        *ngIf="form.get('retardPermis')?.hasError('min') || form.get('retardPermis')?.hasError('max')">
+                        Entre 0 et 120 minutes
+                    </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Sortie Permise (min)</mat-label>
+                    <input matInput type="number" formControlName="sortiePermis" min="0" max="120" />
+                    <mat-error
+                        *ngIf="form.get('sortiePermis')?.hasError('min') || form.get('sortiePermis')?.hasError('max')">
+                        Entre 0 et 120 minutes
+                    </mat-error>
+                </mat-form-field>
+            </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Night Shift Settings -->
+        <div class="form-section">
+            <h4>Configuration Nuit / Dimanche</h4>
+
+            <div class="toggle-row">
+                <mat-slide-toggle formControlName="posteNuit" color="primary">
+                    Poste de Nuit
+                </mat-slide-toggle>
+            </div>
+
+            <div class="form-row" *ngIf="form.get('posteNuit')?.value">
+                <mat-form-field appearance="outline">
+                    <mat-label>Heures Nuit</mat-label>
+                    <input matInput type="number" formControlName="heuresNuit" step="0.5" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Plafond Dimanche</mat-label>
+                    <input matInput type="number" formControlName="plafondDim" step="0.5" />
+                </mat-form-field>
+            </div>
+
+            <div class="toggle-row">
+                <mat-slide-toggle formControlName="ignoreDimanche" color="warn">
+                    Ignorer Dimanche
+                </mat-slide-toggle>
+
+                <mat-slide-toggle formControlName="ignoreNuit" color="warn">
+                    Ignorer Nuit
+                </mat-slide-toggle>
+            </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Status -->
+        <div class="form-section">
+            <mat-slide-toggle formControlName="active" color="primary">
+                Poste Actif
+            </mat-slide-toggle>
+        </div>
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Annuler</button>
+    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!form.valid">
+        {{ isEdit ? 'Modifier' : 'Créer' }}
+    </button>
+</mat-dialog-actions>

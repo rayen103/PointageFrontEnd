@@ -1,0 +1,121 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
+    <div class="flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <p class="text-xs uppercase tracking-[0.12em] text-indigo-600 font-semibold">Configuration</p>
+        <h1 class="mt-1 text-3xl font-bold text-slate-900">Paramètres système</h1>
+        <p class="mt-2 text-sm text-slate-600 max-w-2xl">Ajustez les règles d'arrondi, portions d'heure et seuils utilisés par le moteur de pointage.</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold"
+              [class]="hasChanges() ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'">
+          <span class="h-2 w-2 rounded-full" [class]="hasChanges() ? 'bg-amber-500' : 'bg-emerald-500'"></span>
+          {{ hasChanges() ? 'Modifications non enregistrées' : 'À jour' }}
+        </span>
+      </div>
+    </div>
+
+    @if (toast()) {
+      <div class="rounded-xl border px-4 py-3 flex items-start gap-3 shadow-sm"
+           [class]="toast()!.type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-red-50 border-red-200 text-red-800'">
+        <div class="mt-1 h-2 w-2 rounded-full"
+             [class]="toast()!.type === 'success' ? 'bg-emerald-500' : 'bg-red-500'"></div>
+        <div class="text-sm font-medium">{{ toast()!.text }}</div>
+      </div>
+    }
+
+    <form [formGroup]="form" class="bg-white border border-slate-200 shadow-lg shadow-slate-200/40 rounded-2xl p-6 space-y-6">
+      <div class="flex flex-col md:flex-row md:items-start gap-4">
+        <div class="w-full md:w-2/5">
+          <label class="block text-sm font-semibold text-slate-800 mb-2">Code société</label>
+          <input type="text" formControlName="codeSoc"
+                 class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 shadow-inner focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200" placeholder="Ex: CST" />
+        </div>
+        <div class="flex-1 rounded-xl bg-slate-900 text-slate-100 px-4 py-3 shadow-inner">
+          <p class="text-xs font-semibold text-indigo-200 mb-1">Conseil</p>
+          <p class="text-sm text-slate-200 leading-5">Charge les valeurs live de la société cible et garde l'historique intact tant que vous n'enregistrez pas.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-slate-800">NBR_PORTION_HEURE</label>
+          <input type="number" formControlName="nbrPortionHeure"
+                 class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 shadow-inner focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                 placeholder="Portions/heure (ex: 6 => 10mn)" />
+          <p class="text-xs text-slate-500">Nombre de portions par heure (ListParametres)</p>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-slate-800">ARRONDI_POINT_ENT</label>
+          <input type="number" formControlName="arrondiPointEnt"
+                 class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 shadow-inner focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                 placeholder="1=proche, 2=haut, 3=bas" />
+          <p class="text-xs text-slate-500">Arrondi des entrées (1/2/3)</p>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-slate-800">ARRONDI_POINT_SORT</label>
+          <input type="number" formControlName="arrondiPointSort"
+                 class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 shadow-inner focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                 placeholder="1=proche, 2=haut, 3=bas" />
+          <p class="text-xs text-slate-500">Arrondi des sorties (1/2/3)</p>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-slate-800">PORTION_HEURE_SUPP</label>
+          <input type="number" formControlName="portionHeureSupp"
+                 class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 shadow-inner focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                 placeholder="Seuil minutes HS" />
+          <p class="text-xs text-slate-500">Minutes au-delà desquelles on compte HS</p>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-slate-800">INTERVAL_REPETE</label>
+          <input type="number" formControlName="intervalRepete"
+                 class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 shadow-inner focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                 placeholder="Intervalle de répétition (mn)" />
+          <p class="text-xs text-slate-500">Filtrage des pointages répétés</p>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-slate-800">DEMARRAGE_POSTE_NUIT</label>
+          <input type="number" formControlName="demarragePosteNuit"
+                 class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 shadow-inner focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                 placeholder="0=J-1, 1=J" />
+          <p class="text-xs text-slate-500">Règle d'affectation jour/nuit</p>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-slate-800">REF_POSTE_MENSUEL</label>
+          <input type="text" formControlName="refPosteMensuel"
+                 class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 shadow-inner focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                 placeholder="Référence poste mensuel" />
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-slate-800">REF_POSTE_HORAIRE</label>
+          <input type="text" formControlName="refPosteHoraire"
+                 class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 shadow-inner focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                 placeholder="Référence poste horaire" />
+        </div>
+      </div>
+
+      <div class="flex flex-wrap justify-end gap-3">
+        <button type="button" (click)="loadParameters()"
+                class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:border-slate-300 hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
+                [disabled]="loading()">
+          <span class="i-lucide-refresh-cw" aria-hidden="true"></span>
+          Recharger
+        </button>
+        <button type="button" (click)="save()"
+                class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-indigo-700 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                [disabled]="loading() || !hasChanges()">
+          <span class="i-lucide-save" aria-hidden="true"></span>
+          Enregistrer
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+

@@ -1,0 +1,120 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="summary-container">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200">
+          <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <h2 class="text-2xl font-semibold text-slate-900">Récapitulatif Mensuel - Heures Supplémentaires</h2>
+            <div class="header-actions grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-slate-700 mb-2">Mois</label>
+              <select class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-white" [(value)]="selectedMonth" (change)="loadSummary()">
+                @for (m of months; track m.value) {
+                  <option [value]="m.value">{{ m.label }}</option>
+                }
+              </select>
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-slate-700 mb-2">Année</label>
+              <select class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-white" [(value)]="selectedYear" (change)="loadSummary()">
+                @for (y of years; track y) {
+                  <option [value]="y">{{ y }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-6">
+          @if (loading()) {
+            <div class="loading">
+              <div class="flex justify-center py-8"><div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-200 border-t-primary-600"></div></div>
+            </div>
+          } @else if (summary()) {
+            <div class="summary-cards">
+              <div class="card hs25">
+                <span class="text-lg">schedule</span>
+                <div class="card-content">
+                  <div class="value">{{ summary()!.totalHeuresSupp25 || 0 }}h</div>
+                  <div class="label">HS 25%</div>
+                </div>
+              </div>
+
+              <div class="card hs50">
+                <span class="text-lg">schedule</span>
+                <div class="card-content">
+                  <div class="value">{{ summary()!.totalHeuresSupp50 || 0 }}h</div>
+                  <div class="label">HS 50%</div>
+                </div>
+              </div>
+
+              <div class="card hs75">
+                <span class="text-lg">schedule</span>
+                <div class="card-content">
+                  <div class="value">{{ summary()!.totalHeuresSupp75 || 0 }}h</div>
+                  <div class="label">HS 75%</div>
+                </div>
+              </div>
+
+              <div class="card hs100">
+                <span class="text-lg">schedule</span>
+                <div class="card-content">
+                  <div class="value">{{ summary()!.totalHeuresSupp100 || 0 }}h</div>
+                  <div class="label">HS 100%</div>
+                </div>
+              </div>
+
+              <div class="card total">
+                <span class="text-lg">assessment</span>
+                <div class="card-content">
+                  <div class="value">{{ calculateTotal() }}h</div>
+                  <div class="label">Total HS</div>
+                </div>
+              </div>
+
+              <div class="card delays">
+                <span class="text-lg">access_time</span>
+                <div class="card-content">
+                  <div class="value">{{ summary()!.totalRetards || 0 }}</div>
+                  <div class="label">Retards</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="details-section">
+              <h3>Détails par Catégorie</h3>
+              <table class="min-w-full divide-y divide-slate-200">
+                <thead class="bg-slate-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Catégorie</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Heures</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Taux</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Pondéré</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                  @if (detailRows().length) {
+                    @for (row of detailRows(); track row.category) {
+                      <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{{ row.category }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{{ row.hours }}h</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{{ row.rate }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                          <strong>{{ row.weighted | number: '1.2-2' }}h</strong>
+                        </td>
+                      </tr>
+                    }
+                  } @else {
+                    <tr>
+                      <td class="px-6 py-4 text-sm text-slate-500" colspan="4">Aucune donnée disponible pour cette période.</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

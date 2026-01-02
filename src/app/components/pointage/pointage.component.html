@@ -1,0 +1,178 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="pointage-container">
+  <header class="header">
+    <h1>Gestion du Pointage</h1>
+  </header>
+
+  <div class="tabs">
+    <button [class.active]="!showSummary" (click)="showSummary = false">Liste des Pointages</button>
+    <button [class.active]="showSummary" (click)="showSummary = true">Résumé Journalier</button>
+  </div>
+
+  <!-- Search Form -->
+  @if (!showSummary) {
+    <div class="search-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Code Société</label>
+          <input type="text" [(ngModel)]="searchRequest.codeSociete" placeholder="Code société">
+        </div>
+        <div class="form-group">
+          <label>Matricule</label>
+          <input type="text" [(ngModel)]="searchRequest.matricule" placeholder="Matricule">
+        </div>
+        <div class="form-group">
+          <label>Date Début</label>
+          <input type="date" [(ngModel)]="searchRequest.dateDebut">
+        </div>
+        <div class="form-group">
+          <label>Date Fin</label>
+          <input type="date" [(ngModel)]="searchRequest.dateFin">
+        </div>
+        <div class="form-group">
+          <label>Type</label>
+          <select [(ngModel)]="searchRequest.typePointage">
+            <option value="">Tous</option>
+            <option value="E">Entrée</option>
+            <option value="S">Sortie</option>
+          </select>
+        </div>
+      </div>
+      <button type="button" (click)="loadPointages()" [disabled]="loading()">Rechercher</button>
+    </div>
+  }
+
+  <!-- Summary Form -->
+  @if (showSummary) {
+    <div class="search-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Code Société</label>
+          <input type="text" [(ngModel)]="summaryParams.codeSociete" placeholder="Code société" required>
+        </div>
+        <div class="form-group">
+          <label>Date Début</label>
+          <input type="date" [(ngModel)]="summaryParams.dateDebut">
+        </div>
+        <div class="form-group">
+          <label>Date Fin</label>
+          <input type="date" [(ngModel)]="summaryParams.dateFin">
+        </div>
+        <div class="form-group">
+          <label>Matricule (optionnel)</label>
+          <input type="text" [(ngModel)]="summaryParams.matricule" placeholder="Matricule">
+        </div>
+      </div>
+      <button type="button" (click)="loadSummary()" [disabled]="loading()">Générer Résumé</button>
+    </div>
+  }
+
+  <!-- Loading/Error -->
+  @if (loading()) {
+    <div class="state">Chargement...</div>
+  }
+  @if (error()) {
+    <div class="state error">{{ error() }}</div>
+  }
+
+  <!-- Pointages List -->
+  @if (!showSummary && !loading() && pointages().length > 0) {
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Heure</th>
+            <th>Matricule</th>
+            <th>Nom</th>
+            <th>Type</th>
+            <th>Pointeuse</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of pointages(); track p.matricule + p.datePnt) {
+            <tr>
+              <td>{{ p.datePnt | date:'dd/MM/yyyy' }}</td>
+              <td>{{ p.heurePnt }}</td>
+              <td><code>{{ p.matricule }}</code></td>
+              <td>{{ p.nomPrenom }}</td>
+              <td>
+                <span [class.badge-entry]="p.typePnt === 'E'" [class.badge-exit]="p.typePnt === 'S'">
+                  {{ p.typePnt === 'E' ? 'Entrée' : p.typePnt === 'S' ? 'Sortie' : p.typePnt }}
+                </span>
+              </td>
+              <td>{{ p.pointeuse }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <!-- Pagination -->
+      @if (totalPages > 1) {
+        <div class="pagination">
+          <button [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)">Précédent</button>
+          <span>Page {{ currentPage() }} sur {{ totalPages }} ({{ totalCount() }} total)</span>
+          <button [disabled]="currentPage() === totalPages" (click)="goToPage(currentPage() + 1)">Suivant</button>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Summary Table with deferrable view -->
+  @defer (when showSummary && !loading()) {
+    @if (summaries().length > 0) {
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Matricule</th>
+              <th>Nom</th>
+              <th>Heure Entrée</th>
+              <th>Heure Sortie</th>
+              <th>Durée</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of summaries(); track s.matricule + s.date) {
+              <tr>
+                <td>{{ s.date | date:'dd/MM/yyyy' }}</td>
+                <td><code>{{ s.matricule }}</code></td>
+                <td>{{ s.nomPrenom }}</td>
+                <td>{{ s.heureEntree | date:'HH:mm' }}</td>
+                <td>{{ s.heureSortie | date:'HH:mm' }}</td>
+                <td>{{ s.dureeTravail }}h</td>
+                <td>
+                  <span [class.badge-complete]="s.isComplete" [class.badge-incomplete]="!s.isComplete">
+                    {{ s.isComplete ? 'Complet' : 'Incomplet' }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  } @placeholder {
+    <div class="table-container animate-pulse">
+      <div class="h-10 bg-slate-200 rounded mb-3"></div>
+      <div class="space-y-2">
+        <div class="h-4 bg-slate-200 rounded"></div>
+        <div class="h-4 bg-slate-200 rounded"></div>
+        <div class="h-4 bg-slate-200 rounded"></div>
+      </div>
+    </div>
+  }
+
+  @if (!loading() && ((!showSummary && pointages().length === 0) || (showSummary && summaries().length === 0))) {
+    <div class="empty-state">
+      Aucune donnée trouvée
+    </div>
+  }
+</div>
+
+
+  </div>
+</div>

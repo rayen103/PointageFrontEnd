@@ -1,0 +1,140 @@
+<div class="user-access-management">
+    <mat-card class="search-card">
+        <mat-card-header>
+            <mat-card-title>
+                <mat-icon>admin_panel_settings</mat-icon>
+                Gestion des Utilisateurs et Droits d'Accès
+            </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <div class="search-form">
+                <mat-form-field appearance="outline">
+                    <mat-label>Code Société</mat-label>
+                    <input matInput [(ngModel)]="searchCSociete" placeholder="CST">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Code Utilisateur</mat-label>
+                    <input matInput [value]="searchCUtilisateur()"
+                        (input)="searchCUtilisateur.set($any($event.target).value)">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Nom</mat-label>
+                    <input matInput [value]="searchNom()" (input)="searchNom.set($any($event.target).value)">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Rôle</mat-label>
+                    <mat-select [value]="searchCRole()" (selectionChange)="searchCRole.set($event.value)">
+                        <mat-option value="">Tous</mat-option>
+                        @for (role of roleOptions; track role) {
+                        <mat-option [value]="role">{{ role }}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+
+                <div class="search-actions">
+                    <button mat-raised-button color="primary" (click)="searchUsers()">
+                        <mat-icon>search</mat-icon>
+                        Rechercher
+                    </button>
+                    <button mat-stroked-button (click)="clearSearch()">
+                        <mat-icon>clear</mat-icon>
+                        Effacer
+                    </button>
+                    <button mat-raised-button color="accent" (click)="openCreateDialog()">
+                        <mat-icon>person_add</mat-icon>
+                        Nouvel Utilisateur
+                    </button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <mat-card class="results-card">
+        <mat-card-content>
+            @if (loading()) {
+            <div class="loading-container">
+                <mat-spinner diameter="40"></mat-spinner>
+                <span>Chargement...</span>
+            </div>
+            } @else {
+            <div class="results-header">
+                <span class="results-count">{{ totalCount() }} utilisateur(s) trouvé(s)</span>
+            </div>
+
+            <table mat-table [dataSource]="users()" class="user-table">
+                <!-- Code Utilisateur Column -->
+                <ng-container matColumnDef="cUtilisateur">
+                    <th mat-header-cell *matHeaderCellDef>Code</th>
+                    <td mat-cell *matCellDef="let user">{{ user.cUtilisateur }}</td>
+                </ng-container>
+
+                <!-- Nom Column -->
+                <ng-container matColumnDef="nom">
+                    <th mat-header-cell *matHeaderCellDef>Nom</th>
+                    <td mat-cell *matCellDef="let user">{{ user.nom || '-' }}</td>
+                </ng-container>
+
+                <!-- Prenom Column -->
+                <ng-container matColumnDef="prenom">
+                    <th mat-header-cell *matHeaderCellDef>Prénom</th>
+                    <td mat-cell *matCellDef="let user">{{ user.prenom || '-' }}</td>
+                </ng-container>
+
+                <!-- Email Column -->
+                <ng-container matColumnDef="email">
+                    <th mat-header-cell *matHeaderCellDef>Email</th>
+                    <td mat-cell *matCellDef="let user">{{ user.email || '-' }}</td>
+                </ng-container>
+
+                <!-- Role Column -->
+                <ng-container matColumnDef="cRole">
+                    <th mat-header-cell *matHeaderCellDef>Rôle</th>
+                    <td mat-cell *matCellDef="let user">
+                        <span class="role-badge" [class]="'role-' + (user.cRole?.toLowerCase() || 'user')">
+                            {{ user.cRole || 'USER' }}
+                        </span>
+                    </td>
+                </ng-container>
+
+                <!-- Admin Column -->
+                <ng-container matColumnDef="bAdministrateur">
+                    <th mat-header-cell *matHeaderCellDef>Admin</th>
+                    <td mat-cell *matCellDef="let user">
+                        @if (user.bAdministrateur) {
+                        <mat-icon class="admin-icon">verified_user</mat-icon>
+                        } @else {
+                        <span>-</span>
+                        }
+                    </td>
+                </ng-container>
+
+                <!-- Actions Column -->
+                <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef>Actions</th>
+                    <td mat-cell *matCellDef="let user">
+                        <button mat-icon-button color="primary" matTooltip="Modifier" (click)="editUser(user)">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn" matTooltip="Supprimer" (click)="deleteUser(user)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+
+            @if (users().length === 0) {
+            <div class="no-data">
+                <mat-icon>person_off</mat-icon>
+                <p>Aucun utilisateur trouvé</p>
+            </div>
+            }
+            }
+        </mat-card-content>
+    </mat-card>
+</div>

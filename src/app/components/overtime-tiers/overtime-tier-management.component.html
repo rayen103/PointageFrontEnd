@@ -1,0 +1,129 @@
+<div class="overtime-tier-management">
+    <mat-card class="search-card">
+        <mat-card-header>
+            <mat-card-title>
+                <mat-icon>layers</mat-icon>
+                Gestion des Paliers Heures Supplémentaires
+            </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <div class="search-form">
+                <mat-form-field appearance="outline">
+                    <mat-label>Code Société</mat-label>
+                    <input matInput [(ngModel)]="searchCodeSoc" placeholder="CST">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Code Palier</mat-label>
+                    <input matInput [value]="searchCodePalier()"
+                        (input)="searchCodePalier.set($any($event.target).value)" placeholder="Ex: P01">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Type</mat-label>
+                    <mat-select [value]="searchTypePalier()" (selectionChange)="searchTypePalier.set($event.value)">
+                        <mat-option value="">Tous</mat-option>
+                        @for (type of typePalierOptions; track type) {
+                        <mat-option [value]="type">{{ getTypePalierLabel(type) }}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+
+                <div class="search-actions">
+                    <button mat-raised-button color="primary" (click)="searchOvertimeTiers()">
+                        <mat-icon>search</mat-icon>
+                        Rechercher
+                    </button>
+                    <button mat-stroked-button (click)="clearSearch()">
+                        <mat-icon>clear</mat-icon>
+                        Effacer
+                    </button>
+                    <button mat-raised-button color="accent" (click)="openCreateDialog()">
+                        <mat-icon>add</mat-icon>
+                        Nouveau Palier
+                    </button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <mat-card class="results-card">
+        <mat-card-content>
+            @if (loading()) {
+            <div class="loading-container">
+                <mat-spinner diameter="40"></mat-spinner>
+                <span>Chargement...</span>
+            </div>
+            } @else {
+            <div class="results-header">
+                <span class="results-count">{{ totalCount() }} palier(s) trouvé(s)</span>
+            </div>
+
+            <table mat-table [dataSource]="overtimeTiers()" class="overtime-tier-table">
+                <!-- Code Palier Column -->
+                <ng-container matColumnDef="codePalier">
+                    <th mat-header-cell *matHeaderCellDef>Code</th>
+                    <td mat-cell *matCellDef="let tier">{{ tier.codePalier }}</td>
+                </ng-container>
+
+                <!-- Designation Column -->
+                <ng-container matColumnDef="desigPalier">
+                    <th mat-header-cell *matHeaderCellDef>Désignation</th>
+                    <td mat-cell *matCellDef="let tier">{{ tier.desigPalier || '-' }}</td>
+                </ng-container>
+
+                <!-- Type Palier Column -->
+                <ng-container matColumnDef="typePalier">
+                    <th mat-header-cell *matHeaderCellDef>Type</th>
+                    <td mat-cell *matCellDef="let tier">
+                        <span class="type-badge" [class]="'type-' + tier.typePalier?.toLowerCase()">
+                            {{ getTypePalierLabel(tier.typePalier) }}
+                        </span>
+                    </td>
+                </ng-container>
+
+                <!-- Valeur Column -->
+                <ng-container matColumnDef="valeur">
+                    <th mat-header-cell *matHeaderCellDef>Valeur (h)</th>
+                    <td mat-cell *matCellDef="let tier">{{ tier.valeur ?? '-' }}</td>
+                </ng-container>
+
+                <!-- Taux Column -->
+                <ng-container matColumnDef="taux">
+                    <th mat-header-cell *matHeaderCellDef>Taux</th>
+                    <td mat-cell *matCellDef="let tier">{{ formatRate(tier.taux) }}</td>
+                </ng-container>
+
+                <!-- Ordre Column -->
+                <ng-container matColumnDef="ordre">
+                    <th mat-header-cell *matHeaderCellDef>Ordre</th>
+                    <td mat-cell *matCellDef="let tier">{{ tier.ordre ?? '-' }}</td>
+                </ng-container>
+
+                <!-- Actions Column -->
+                <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef>Actions</th>
+                    <td mat-cell *matCellDef="let tier">
+                        <button mat-icon-button color="primary" matTooltip="Modifier" (click)="editOvertimeTier(tier)">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn" matTooltip="Supprimer" (click)="deleteOvertimeTier(tier)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+
+            @if (overtimeTiers().length === 0) {
+            <div class="no-data">
+                <mat-icon>inbox</mat-icon>
+                <p>Aucun palier trouvé</p>
+            </div>
+            }
+            }
+        </mat-card-content>
+    </mat-card>
+</div>

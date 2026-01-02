@@ -1,0 +1,128 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="schedule-container">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200">
+          <div class="header-content">
+            <div>
+              <h2 class="text-xl font-semibold text-slate-900">Gestion des Horaires</h2>
+            </div>
+            <div class="header-actions">
+              <div class="flex gap-2 mb-4">
+                <button
+                  class="inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-colors"
+                  [class.bg-primary-600]="currentView() === 'list'"
+                  [class.text-white]="currentView() === 'list'"
+                  [class.hover:bg-slate-100]="currentView() !== 'list'"
+                  (click)="setView('list')">
+                  <span class="text-lg">list</span>
+                  Liste
+                </button>
+                <button
+                  class="inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-colors"
+                  [class.bg-primary-600]="currentView() === 'calendar'"
+                  [class.text-white]="currentView() === 'calendar'"
+                  [class.hover:bg-slate-100]="currentView() !== 'calendar'"
+                  (click)="setView('calendar')">
+                  <span class="text-lg">calendar_month</span>
+                  Calendrier
+                </button>
+              </div>
+              <button class="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors shadow-sm" (click)="openCreateDialog()">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                Nouvel Horaire
+              </button>
+            </div>
+          </div>
+        </div>
+
+    <div class="p-6">
+      @if (loading()) {
+        <div class="loading-container">
+          <div class="flex justify-center py-8"><div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-200 border-t-primary-600"></div></div>
+        </div>
+      } @else if (error()) {
+        <div class="error-message">
+          <span class="text-lg">error</span>
+          <p>{{ error() }}</p>
+          <button class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors" (click)="loadSchedules()">Réessayer</button>
+        </div>
+      } @else {
+        @if (currentView() === 'calendar') {
+          <div class="calendar-header">
+            <button class="p-2 rounded-lg hover:bg-slate-100 transition-colors" (click)="previousMonth()">
+              <span class="text-lg">chevron_left</span>
+            </button>
+            <h3>{{ getMonthName() }}</h3>
+            <button class="p-2 rounded-lg hover:bg-slate-100 transition-colors" (click)="nextMonth()">
+              <span class="text-lg">chevron_right</span>
+            </button>
+            <button class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-slate-100 transition-colors" (click)="goToToday()">Aujourd'hui</button>
+          </div>
+
+          <div class="calendar-grid">
+            <div class="calendar-weekdays">
+              @for (day of weekDays; track day) {
+                <div class="weekday-header">{{ day }}</div>
+              }
+            </div>
+
+            <div class="calendar-days">
+              @for (dayData of calendarDays(); track dayData.date) {
+                <div class="calendar-day"
+                     [class.weekend]="dayData.isWeekend"
+                     [class.today]="dayData.isToday">
+                  <div class="day-number">{{ dayData.date.getDate() }}</div>
+                  <div class="day-schedules">
+                    @for (schedule of dayData.schedules; track schedule.codeHoraire) {
+                      <div class="schedule-chip" [matTooltip]="schedule.codeHoraire">
+                        <span class="schedule-time">
+                          {{ getMorningTime(schedule) }}
+                        </span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        } @else {
+          <div class="table-container">
+            <table class="min-w-full divide-y divide-slate-200">
+              <thead>
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Code</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Jour</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Matin</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Après-midi</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200">
+                @for (schedule of schedules(); track schedule.codeHoraire) {
+                  <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{{ schedule.codeHoraire }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{{ schedule.libelleJour }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{{ getMorningTime(schedule) }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{{ getAfternoonTime(schedule) }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                      <button class="p-2 rounded-lg hover:bg-slate-100 transition-colors" [matTooltip]="'Modifier'" (click)="openEditDialog(schedule)">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                      </button>
+                      <button class="p-2 rounded-lg hover:bg-slate-100 transition-colors" color="warn" [matTooltip]="'Supprimer'" (click)="deleteSchedule(schedule)">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      }
+    </div>
+  </div>
+</div>
+
+  </div>
+</div>

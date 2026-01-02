@@ -1,0 +1,93 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="stats-container">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200">
+          <div class="text-xl font-semibold text-slate-900">
+            <h2>Statistiques Heures Supplémentaires</h2>
+          </h2>
+          <button class="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors shadow-sm" (click)="refresh()">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+            Actualiser
+          </button>
+        </div>
+
+        <div class="p-6">
+          @if (loading()) {
+            <div class="loading">
+              <div class="flex justify-center py-8"><div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-200 border-t-primary-600"></div></div>
+            </div>
+          } @else {
+            <div class="stats-grid">
+              <div class="stat-card primary">
+                <div class="stat-icon">
+                  <span class="text-lg">schedule</span>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-value">{{ totalHs25() }}h</div>
+                  <div class="stat-label">HS 25%</div>
+                  <div class="stat-subtitle">{{ countHs25() }} enregistrements</div>
+                </div>
+              </div>
+
+              <div class="stat-card success">
+                <div class="stat-icon">
+                  <span class="text-lg">schedule</span>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-value">{{ totalHs50() }}h</div>
+                  <div class="stat-label">HS 50%</div>
+                  <div class="stat-subtitle">{{ countHs50() }} enregistrements</div>
+                </div>
+              </div>
+
+              <div class="stat-card warning">
+                <div class="stat-icon">
+                  <span class="text-lg">schedule</span>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-value">{{ totalHs75() }}h</div>
+                  <div class="stat-label">HS 75%</div>
+                  <div class="stat-subtitle">{{ countHs75() }} enregistrements</div>
+                </div>
+              </div>
+
+              <div class="stat-card danger">
+                <div class="stat-icon">
+                  <span class="text-lg">schedule</span>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-value">{{ totalHs100() }}h</div>
+                  <div class="stat-label">HS 100%</div>
+                  <div class="stat-subtitle">{{ countHs100() }} enregistrements</div>
+                </div>
+              </div>
+
+              <div class="stat-card total">
+                <div class="stat-icon">
+                  <span class="text-lg">assessment</span>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-value">{{ totalHours() }}h</div>
+                  <div class="stat-label">Total Heures</div>
+                  <div class="stat-subtitle">{{ totalRecords() }} enregistrements</div>
+                </div>
+              </div>
+
+              <div class="stat-card weighted">
+                <div class="stat-icon">
+                  <span class="text-lg">trending_up</span>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-value">{{ weightedTotal() }}h</div>
+                  <div class="stat-label">Total Pondéré</div>
+                  <div class="stat-subtitle">Valeur totale</div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

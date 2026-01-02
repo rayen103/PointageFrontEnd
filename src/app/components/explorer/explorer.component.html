@@ -1,0 +1,146 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 animate-fade-in">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="animate-slide-in-up">
+      <!-- Header Card -->
+      <header class="card mb-6 animate-scale-in">
+        <div class="flex justify-between items-center gap-4">
+          <div>
+            <p class="text-xs uppercase tracking-wider text-slate-500 mb-1">CSTDATACCE_DEP Database Explorer</p>
+            <h1 class="text-2xl font-semibold text-slate-900 mb-1">SQL Server Tables</h1>
+            <p class="text-sm text-slate-600">API: <code class="bg-slate-100 px-2 py-0.5 rounded text-xs font-mono">{{ apiBaseUrl }}</code></p>
+          </div>
+          <div>
+            <button type="button" (click)="loadTables()" class="btn-primary">
+              Refresh Tables
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6">
+        <!-- Tables List Sidebar -->
+        <aside class="card animate-slide-in-left max-h-[calc(100vh-200px)] overflow-y-auto">
+          <h2 class="text-lg font-semibold text-slate-900 mb-4">Tables ({{ tables().length }})</h2>
+
+          <div *ngIf="loadingTables()" class="text-center py-4 text-slate-600">
+            <div class="spinner mx-auto mb-2"></div>
+            Loading tables...
+          </div>
+          <div *ngIf="tablesError()" class="alert-danger">
+            Error: {{ tablesError() }}
+          </div>
+
+          <div class="flex flex-col gap-1" *ngIf="!loadingTables() && !tablesError()">
+            <button
+              *ngFor="let table of tables()"
+              type="button"
+              class="flex justify-between items-center px-3 py-2 border border-slate-200 rounded-lg bg-white hover:bg-slate-50 hover:border-slate-300 transition-all text-left"
+              [class.!bg-blue-50]="selectedTable() === table.tableName"
+              [class.!border-primary-500]="selectedTable() === table.tableName"
+              [class.font-medium]="selectedTable() === table.tableName"
+              (click)="selectTable(table.tableName)">
+              <span class="text-sm text-slate-900">{{ table.tableName }}</span>
+              <span class="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">{{ table.rowCount | number }}</span>
+            </button>
+          </div>
+        </aside>
+
+        <!-- Table Data Main Content -->
+        <section class="card animate-slide-in-right">
+          <div *ngIf="!selectedTable()" class="text-center py-12 text-slate-500">
+            <p>Select a table from the sidebar to view its data</p>
+          </div>
+
+          <div *ngIf="selectedTable()" class="animate-fade-in">
+            <!-- Table Header -->
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-xl font-semibold text-slate-900">{{ selectedTable() }}</h2>
+              <div class="flex gap-2">
+                <button type="button" (click)="showStructure.set(!showStructure())" class="btn-secondary btn-sm">
+                  {{ showStructure() ? 'Hide' : 'Show' }} Structure
+                </button>
+                <button type="button" (click)="loadTableData(selectedTable()!, currentPage())" class="btn-secondary btn-sm">
+                  Refresh
+                </button>
+              </div>
+            </div>
+
+            <!-- Table Structure Panel -->
+            <div *ngIf="showStructure() && tableStructure()" class="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-6 animate-slide-in-down">
+              <h3 class="text-base font-semibold text-slate-900 mb-3">Structure ({{ tableStructure()!.columnCount }} columns)</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div *ngFor="let col of tableStructure()!.columns" class="bg-white p-3 rounded border border-slate-200 flex flex-col gap-1">
+                  <strong class="text-sm text-slate-900">{{ col.name }}</strong>
+                  <span class="text-xs text-slate-600 font-mono">{{ col.underlyingType }}</span>
+                  <span *ngIf="col.isNullable" class="text-xs text-warning-600 italic">nullable</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Table Data Panel -->
+            <div class="mt-4">
+              <div *ngIf="loadingData()" class="text-center py-8 text-slate-600">
+                <div class="spinner-lg mx-auto mb-3"></div>
+                Loading data...
+              </div>
+              <div *ngIf="dataError()" class="alert-danger">
+                Error: {{ dataError() }}
+              </div>
+
+              <div *ngIf="!loadingData() && !dataError()">
+                <div class="mb-4 text-sm text-slate-600">
+                  Showing page {{ currentPage() }} of {{ totalPages() }}
+                  ({{ totalCount() | number }} total rows)
+                </div>
+
+                <div class="table-container" *ngIf="tableData().length > 0">
+                  <table class="table">
+                    <thead class="table-header">
+                      <tr>
+                        <th *ngFor="let key of getTableDataKeys(tableData())" class="table-header-cell">{{ key }}</th>
+                      </tr>
+                    </thead>
+                    <tbody class="table-body">
+                      <tr *ngFor="let row of tableData()" class="table-row">
+                        <td *ngFor="let key of getTableDataKeys(tableData())" class="table-cell">
+                          <code *ngIf="typeof row[key] === 'string'" class="bg-slate-100 px-2 py-0.5 rounded text-xs font-mono">{{ formatValue(row[key]) }}</code>
+                          <span *ngIf="typeof row[key] !== 'string'">{{ formatValue(row[key]) }}</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div *ngIf="tableData().length === 0" class="text-center py-8 text-slate-500">
+                  No data found
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination" *ngIf="totalPages() > 1">
+                  <button
+                    type="button"
+                    class="pagination-btn"
+                    [class.pagination-btn-active]="false"
+                    [disabled]="currentPage() === 1"
+                    (click)="goToPage(currentPage() - 1)">
+                    Previous
+                  </button>
+                  <span class="text-sm text-slate-700">Page {{ currentPage() }} of {{ totalPages() }}</span>
+                  <button
+                    type="button"
+                    class="pagination-btn"
+                    [class.pagination-btn-active]="false"
+                    [disabled]="currentPage() === totalPages()"
+                    (click)="goToPage(currentPage() + 1)">
+                    Next
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>

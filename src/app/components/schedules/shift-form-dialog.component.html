@@ -1,0 +1,55 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<h2 mat-dialog-title>{{ getTitle() }}</h2>
+
+    <mat-dialog-content>
+      @if (error()) {
+        <div class="error-banner">
+          <span class="text-lg">error</span>
+          <span>{{ error() }}</span>
+        </div>
+      }
+
+      <form [formGroup]="shiftForm" class="shift-form">
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-slate-700 mb-2">Code Shift</label>
+          <input class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors" formControlName="codeShift" placeholder="Ex: S001">
+          @if (shiftForm.get('codeShift')?.hasError('required') && shiftForm.get('codeShift')?.touched) {
+            <div class="text-red-600 text-sm">Le code shift est requis</div>
+          }
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-slate-700 mb-2">Désignation</label>
+          <input class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors" formControlName="designationShift" placeholder="Ex: Shift Matin">
+          @if (shiftForm.get('designationShift')?.hasError('required') && shiftForm.get('designationShift')?.touched) {
+            <div class="text-red-600 text-sm">La désignation est requise</div>
+          }
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-slate-700 mb-2">Nombre d'Heures par Mois</label>
+          <input class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors" type="number" formControlName="nbrHeureMois" placeholder="Ex: 173">
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-slate-700 mb-2">Nombre de Jours par Mois</label>
+          <input class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors" type="number" formControlName="nbrJourMois" placeholder="Ex: 22">
+        </div>
+      </form>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-slate-100 transition-colors" (click)="onCancel()" [disabled]="loading()">
+        Annuler
+      </button>
+      <button class="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors shadow-sm" (click)="onSubmit()" [disabled]="loading()">
+        @if (loading()) {
+          <div class="flex justify-center py-8"><div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-200 border-t-primary-600"></div></div>
+        } @else {
+          {{ data.mode === 'create' ? 'Créer' : 'Modifier' }}
+        }
+      </button>
+    </mat-dialog-actions>
+  </div>
+</div>
